@@ -35,6 +35,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# prisma — generated client (regenerated via postinstall)
+/src/generated
+
 # editor / os
 .vscode/*
 !.vscode/extensions.json

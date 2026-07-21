@@ -14,6 +14,12 @@ jobs:
   verify:
     name: Lint · Typecheck · Build
     runs-on: ubuntu-latest
+    # Placeholder values so `prisma generate` (postinstall) and the Auth.js build
+    # step have the env vars they read. CI never connects to a real database.
+    env:
+      DATABASE_URL: "postgresql://user:pass@localhost:5432/collabdoc"
+      DIRECT_URL: "postgresql://user:pass@localhost:5432/collabdoc"
+      AUTH_SECRET: "ci-throwaway-secret-not-used-anywhere"
     steps:
       - uses: actions/checkout@v4
 

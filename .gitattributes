@@ -1,0 +1,13 @@
+# Normalize line endings to LF in the repo so checkouts are consistent across
+# Windows/macOS/Linux and Prettier (which uses LF) doesn't fight Git.
+* text=auto eol=lf
+
+# Treat these as binary (never touch line endings).
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
