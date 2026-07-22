@@ -30,6 +30,7 @@ model User {
 
   ownedDocuments Document[]           @relation("OwnedDocuments")
   permissions    DocumentPermission[]
+  versions       Version[]
 
   @@map("users")
 }
@@ -45,10 +46,27 @@ model Document {
 
   permissions DocumentPermission[]
   state       DocumentState?
+  versions    Version[]
 
   @@index([ownerId])
   @@index([deletedAt])
   @@map("documents")
+}
+
+// A named, immutable snapshot of a document's content, captured on demand.
+// Content is the editor's JSON so a restore can be replayed as a forward edit.
+model Version {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id])
+  label      String
+  content    Json
+  createdAt  DateTime @default(now())
+
+  @@index([documentId, createdAt])
+  @@map("versions")
 }
 
 // Encoded Yjs CRDT state, persisted by the collab server so a document survives

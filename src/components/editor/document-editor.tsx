@@ -12,6 +12,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 
 import { EditorToolbar } from "./editor-toolbar";
 import { ConnectionStatus, type WsStatus } from "./connection-status";
+import { VersionsPanel, type VersionSummary } from "./versions-panel";
 
 const WS_URL = process.env.NEXT_PUBLIC_COLLAB_WS_URL;
 
@@ -27,10 +28,12 @@ export function DocumentEditor({
   documentId,
   editable,
   user,
+  initialVersions,
 }: {
   documentId: string;
   editable: boolean;
   user: { id: string; name: string };
+  initialVersions: VersionSummary[];
 }) {
   const [ydoc] = useState(() => new Y.Doc());
   const [provider, setProvider] = useState<HocuspocusProvider | null>(null);
@@ -101,12 +104,20 @@ export function DocumentEditor({
   );
 
   return (
-    <div className="border-border rounded-lg border p-4">
-      {editable && <EditorToolbar editor={editor} />}
-      <EditorContent editor={editor} />
-      <div className="mt-2 flex justify-end">
-        <ConnectionStatus enabled={Boolean(WS_URL)} status={status} synced={synced} />
+    <div className="flex flex-col gap-4 lg:flex-row">
+      <div className="border-border flex-1 rounded-lg border p-4">
+        {editable && <EditorToolbar editor={editor} />}
+        <EditorContent editor={editor} />
+        <div className="mt-2 flex justify-end">
+          <ConnectionStatus enabled={Boolean(WS_URL)} status={status} synced={synced} />
+        </div>
       </div>
+      <VersionsPanel
+        documentId={documentId}
+        editor={editor}
+        canManage={editable}
+        initialVersions={initialVersions}
+      />
     </div>
   );
 }
