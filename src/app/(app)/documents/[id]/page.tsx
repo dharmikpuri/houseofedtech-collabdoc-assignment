@@ -7,6 +7,7 @@ import { getDocumentAccess } from "@/lib/authz/documents";
 import { listVersions } from "@/lib/authz/versions";
 import { listCollaborators } from "@/lib/authz/sharing";
 import { can } from "@/lib/authz/roles";
+import { isAiEnabled } from "@/lib/ai/gemini";
 import { RoleBadge } from "@/components/documents/role-badge";
 import { ShareDialog } from "@/components/documents/share-dialog";
 import { DocumentTitle } from "@/components/documents/document-title";
@@ -69,6 +70,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
             name: session.user.name ?? session.user.email ?? "Anonymous",
           }}
           initialVersions={versions}
+          aiEnabled={isAiEnabled()}
         />
       </div>
     </div>
