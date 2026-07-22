@@ -44,10 +44,22 @@ model Document {
   deletedAt DateTime? // soft delete — rows are hidden, never hard-deleted
 
   permissions DocumentPermission[]
+  state       DocumentState?
 
   @@index([ownerId])
   @@index([deletedAt])
   @@map("documents")
+}
+
+// Encoded Yjs CRDT state, persisted by the collab server so a document survives
+// restarts and new collaborators load the current content.
+model DocumentState {
+  documentId String   @id @map("document_id")
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  state      Bytes
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("document_states")
 }
 
 // One row per (document, user). Grants a user a role on a document. The owner
