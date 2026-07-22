@@ -2,12 +2,19 @@
 
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
+import { headers } from "next/headers";
 
 import { signIn } from "@/auth";
 import { prisma } from "@/lib/db";
 import { signInSchema, signUpSchema } from "@/lib/validation/auth";
+import { clientIp, rateLimit } from "@/lib/security/rate-limit";
 
 export type AuthActionState = { error?: string };
+
+async function authRateLimit(bucket: string, limit: number): Promise<boolean> {
+  const ip = clientIp(await headers());
+  return rateLimit(`${bucket}:${ip}`, limit, 60_000).ok;
+}
 
 /**
  * Create an account, then sign the user straight in.
@@ -19,6 +26,10 @@ export async function signUpAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  if (!(await authRateLimit("sign-up", 5))) {
+    return { error: "Too many attempts. Please wait a minute and try again." };
+  }
+
   const parsed = signUpSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -55,6 +66,10 @@ export async function signInAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  if (!(await authRateLimit("sign-in", 10))) {
+    return { error: "Too many attempts. Please wait a minute and try again." };
+  }
+
   const parsed = signInSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),

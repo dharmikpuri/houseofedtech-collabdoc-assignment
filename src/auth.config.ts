@@ -12,6 +12,8 @@ import type { NextAuthConfig } from "next-auth";
 const PROTECTED_PREFIXES = ["/dashboard", "/documents"];
 
 export const authConfig = {
+  // Honour the deployment host when validating callback/redirect URLs.
+  trustHost: true,
   pages: {
     signIn: "/sign-in",
   },

@@ -27,11 +27,11 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
 
   const canEdit = can(doc.role, "edit");
   const canManage = can(doc.role, "manageSharing");
-  const versions = (await listVersions(doc.id)).map((version) => ({
+  const versions = (await listVersions(session.user.id, doc.id)).map((version) => ({
     ...version,
     createdAt: version.createdAt.toISOString(),
   }));
-  const collaborators = canManage ? await listCollaborators(doc.id) : [];
+  const collaborators = canManage ? await listCollaborators(session.user.id, doc.id) : [];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
