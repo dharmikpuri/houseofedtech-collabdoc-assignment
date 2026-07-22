@@ -78,3 +78,20 @@ export async function deleteDocument(userId: string, documentId: string): Promis
   });
   return { ok: true };
 }
+
+/** Rename a document. Requires the `edit` capability (Owner or Editor). */
+export async function renameDocument(
+  userId: string,
+  documentId: string,
+  title: string,
+): Promise<MutationResult> {
+  const access = await getDocumentAccess(userId, documentId);
+  if (!access) return { ok: false, reason: "not_found" };
+  if (!can(access.role, "edit")) return { ok: false, reason: "forbidden" };
+
+  await prisma.document.update({
+    where: { id: documentId },
+    data: { title: title.trim() },
+  });
+  return { ok: true };
+}
