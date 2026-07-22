@@ -12,6 +12,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "collab": "npm --prefix collab-server run dev",
+    "collab:install": "npm --prefix collab-server install",
     "postinstall": "prisma generate",
     "prepare": "husky"
   },
@@ -25,6 +27,7 @@
     ]
   },
   "dependencies": {
+    "@hocuspocus/provider": "^4.4.0",
     "@prisma/client": "^6.19.3",
     "@tiptap/extension-collaboration": "^3.28.0",
     "@tiptap/extension-placeholder": "^3.28.0",
