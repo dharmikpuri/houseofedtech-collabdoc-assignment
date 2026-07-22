@@ -3,27 +3,17 @@
 import { useEffect, useState } from "react";
 import * as Y from "yjs";
 import { IndexeddbPersistence } from "y-indexeddb";
+import { HocuspocusProvider } from "@hocuspocus/provider";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
 import Placeholder from "@tiptap/extension-placeholder";
 
 import { EditorToolbar } from "./editor-toolbar";
-import { LocalSaveIndicator } from "./local-save-indicator";
+import { ConnectionStatus, type WsStatus } from "./connection-status";
 
-/**
- * The local-first editor.
- *
- * Content lives in a Yjs document (a CRDT), NOT in React state or the database.
- * `y-indexeddb` mirrors that Yjs doc into the browser's IndexedDB, so:
- *   - editing never touches the network (offline-first),
- *   - reloading — even with no connection — restores the content, and
- *   - the same Yjs doc is what the sync engine will later replicate to the
- *     server, which is what makes conflict-free merging possible.
- *
- * There is intentionally no server round-trip here. Real-time sync is a later
- * phase; this component is the offline foundation it builds on.
- */
+const WS_URL = process.env.NEXT_PUBLIC_COLLAB_WS_URL;
+
 export function DocumentEditor({
   documentId,
   editable,
@@ -31,18 +21,27 @@ export function DocumentEditor({
   documentId: string;
   editable: boolean;
 }) {
-  // One Yjs doc per mount. Y.Doc is plain JS, so constructing it during SSR is safe.
   const [ydoc] = useState(() => new Y.Doc());
+  const [status, setStatus] = useState<WsStatus>("connecting");
   const [synced, setSynced] = useState(false);
 
-  // IndexedDB access is browser-only, so it happens in an effect (never on the server).
   useEffect(() => {
     const persistence = new IndexeddbPersistence(`collabdoc:${documentId}`, ydoc);
-    const handleSynced = () => setSynced(true);
-    persistence.on("synced", handleSynced);
+
+    let provider: HocuspocusProvider | undefined;
+    if (WS_URL) {
+      provider = new HocuspocusProvider({
+        url: WS_URL,
+        name: documentId,
+        document: ydoc,
+        onStatus: ({ status }) => setStatus(status as WsStatus),
+        onSynced: () => setSynced(true),
+        onDisconnect: () => setSynced(false),
+      });
+    }
 
     return () => {
-      persistence.off("synced", handleSynced);
+      provider?.destroy();
       void persistence.destroy();
       ydoc.destroy();
     };
@@ -50,10 +49,9 @@ export function DocumentEditor({
 
   const editor = useEditor({
     editable,
-    // Required for SSR: render on the client to avoid hydration mismatches.
     immediatelyRender: false,
     extensions: [
-      // Collaboration owns undo/redo (via Yjs), so disable StarterKit's own.
+      // Yjs owns undo/redo, so StarterKit's own history is disabled.
       StarterKit.configure({ undoRedo: false }),
       Collaboration.configure({ document: ydoc }),
       Placeholder.configure({ placeholder: "Start writing…" }),
@@ -70,7 +68,7 @@ export function DocumentEditor({
       {editable && <EditorToolbar editor={editor} />}
       <EditorContent editor={editor} />
       <div className="mt-2 flex justify-end">
-        <LocalSaveIndicator synced={synced} />
+        <ConnectionStatus enabled={Boolean(WS_URL)} status={status} synced={synced} />
       </div>
     </div>
   );
