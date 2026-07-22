@@ -1,5 +1,5 @@
-// Prisma schema. The document / version / permission models are added in Phase 3;
-// this phase only needs the User table for email + password authentication.
+// Prisma schema. The CRDT state blob (DocumentState) and version snapshots are
+// added in later phases; this phase adds documents and per-user access roles.
 
 generator client {
   provider = "prisma-client-js"
@@ -12,6 +12,14 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// Access level a user holds on a specific document. Kept in sync with the
+// capability matrix in src/lib/authz/roles.ts.
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -20,5 +28,40 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  ownedDocuments Document[]           @relation("OwnedDocuments")
+  permissions    DocumentPermission[]
+
   @@map("users")
+}
+
+model Document {
+  id        String    @id @default(cuid())
+  title     String    @default("Untitled")
+  ownerId   String
+  owner     User      @relation("OwnedDocuments", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // soft delete — rows are hidden, never hard-deleted
+
+  permissions DocumentPermission[]
+
+  @@index([ownerId])
+  @@index([deletedAt])
+  @@map("documents")
+}
+
+// One row per (document, user). Grants a user a role on a document. The owner
+// gets an OWNER row on creation, so access checks are a single lookup here.
+model DocumentPermission {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role
+  createdAt  DateTime @default(now())
+
+  @@unique([documentId, userId])
+  @@index([userId])
+  @@map("document_permissions")
 }
