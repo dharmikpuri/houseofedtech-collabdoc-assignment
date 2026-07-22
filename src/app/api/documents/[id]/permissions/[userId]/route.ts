@@ -19,7 +19,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const result = await removeCollaborator({ documentId: id, userId });
+  const result = await removeCollaborator({ actorId: session.user.id, documentId: id, userId });
   if (!result.ok) {
     const status = result.reason === "not_found" ? 404 : 400;
     const message = result.reason === "not_found" ? "Not found" : "The owner can't be removed";

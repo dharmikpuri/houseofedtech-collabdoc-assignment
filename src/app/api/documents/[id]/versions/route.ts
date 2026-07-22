@@ -4,7 +4,8 @@ import { auth } from "@/auth";
 import { getDocumentAccess } from "@/lib/authz/documents";
 import { can } from "@/lib/authz/roles";
 import { createVersion, listVersions } from "@/lib/authz/versions";
-import { createVersionSchema } from "@/lib/validation/version";
+import { createVersionSchema, MAX_VERSION_CONTENT_BYTES } from "@/lib/validation/version";
+import { checkBodySize, checkRateLimit } from "@/lib/security/guard";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,11 +15,16 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const access = await getDocumentAccess(session.user.id, id);
   if (!access) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  return NextResponse.json({ versions: await listVersions(id) });
+  return NextResponse.json({ versions: await listVersions(session.user.id, id) });
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const limited = checkRateLimit(request, "version-create", 30, 60_000);
+  if (limited) return limited;
+  const tooLarge = checkBodySize(request, MAX_VERSION_CONTENT_BYTES + 2_048);
+  if (tooLarge) return tooLarge;
+
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

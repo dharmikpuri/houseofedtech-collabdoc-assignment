@@ -1,0 +1,247 @@
+{
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(app)\\actions.ts": {
+    "size": 130,
+    "mtime_ns": 1784706303267384000,
+    "word_count": 19
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(app)\\dashboard\\actions.ts": {
+    "size": 841,
+    "mtime_ns": 1784706303269384700,
+    "word_count": 99
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(app)\\dashboard\\page.tsx": {
+    "size": 2226,
+    "mtime_ns": 1784706303270386500,
+    "word_count": 205
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(app)\\documents\\[id]\\actions.ts": {
+    "size": 981,
+    "mtime_ns": 1784706303271386100,
+    "word_count": 129
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(app)\\documents\\[id]\\page.tsx": {
+    "size": 2683,
+    "mtime_ns": 1784707684915781500,
+    "word_count": 267
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(app)\\layout.tsx": {
+    "size": 1322,
+    "mtime_ns": 1784706303275533200,
+    "word_count": 130
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(auth)\\actions.ts": {
+    "size": 2651,
+    "mtime_ns": 1784707783301636600,
+    "word_count": 341
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(auth)\\auth-form.tsx": {
+    "size": 2491,
+    "mtime_ns": 1784706303278371400,
+    "word_count": 246
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(auth)\\layout.tsx": {
+    "size": 467,
+    "mtime_ns": 1784706303279823000,
+    "word_count": 47
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(auth)\\sign-in\\page.tsx": {
+    "size": 403,
+    "mtime_ns": 1784706303280818900,
+    "word_count": 50
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\(auth)\\sign-up\\page.tsx": {
+    "size": 416,
+    "mtime_ns": 1784706303282039100,
+    "word_count": 50
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\api\\auth\\[...nextauth]\\route.ts": {
+    "size": 212,
+    "mtime_ns": 1784706303284192400,
+    "word_count": 34
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\api\\collab-token\\route.ts": {
+    "size": 1255,
+    "mtime_ns": 1784707760068566800,
+    "word_count": 146
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\api\\documents\\[id]\\permissions\\[userId]\\route.ts": {
+    "size": 1172,
+    "mtime_ns": 1784707679040361600,
+    "word_count": 160
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\api\\documents\\[id]\\permissions\\route.ts": {
+    "size": 2429,
+    "mtime_ns": 1784707749661232500,
+    "word_count": 296
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\api\\documents\\[id]\\versions\\[versionId]\\route.ts": {
+    "size": 848,
+    "mtime_ns": 1784707661485905400,
+    "word_count": 111
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\api\\documents\\[id]\\versions\\route.ts": {
+    "size": 2104,
+    "mtime_ns": 1784707728355190800,
+    "word_count": 253
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\layout.tsx": {
+    "size": 924,
+    "mtime_ns": 1784706303292071100,
+    "word_count": 97
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\app\\page.tsx": {
+    "size": 1369,
+    "mtime_ns": 1784706303293071900,
+    "word_count": 124
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\auth.config.ts": {
+    "size": 1759,
+    "mtime_ns": 1784707816811436800,
+    "word_count": 229
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\auth.ts": {
+    "size": 1452,
+    "mtime_ns": 1784706303295071600,
+    "word_count": 189
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\documents\\delete-document-button.tsx": {
+    "size": 960,
+    "mtime_ns": 1784706303296291400,
+    "word_count": 105
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\documents\\document-title.tsx": {
+    "size": 1983,
+    "mtime_ns": 1784706303297088300,
+    "word_count": 204
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\documents\\role-badge.tsx": {
+    "size": 483,
+    "mtime_ns": 1784706303297088300,
+    "word_count": 58
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\documents\\share-dialog.tsx": {
+    "size": 4936,
+    "mtime_ns": 1784707060980176400,
+    "word_count": 369
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\editor\\connection-status.tsx": {
+    "size": 1002,
+    "mtime_ns": 1784706303298751700,
+    "word_count": 122
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\editor\\document-editor.tsx": {
+    "size": 3944,
+    "mtime_ns": 1784706303299901400,
+    "word_count": 384
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\editor\\editor-toolbar.tsx": {
+    "size": 2623,
+    "mtime_ns": 1784706303301894700,
+    "word_count": 255
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\editor\\versions-panel.tsx": {
+    "size": 3672,
+    "mtime_ns": 1784706303302770000,
+    "word_count": 336
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\layout\\site-footer.tsx": {
+    "size": 1319,
+    "mtime_ns": 1784658517865733200,
+    "word_count": 114
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\pwa\\service-worker-register.tsx": {
+    "size": 855,
+    "mtime_ns": 1784706303304047100,
+    "word_count": 113
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\ui\\button.tsx": {
+    "size": 953,
+    "mtime_ns": 1784706303305044700,
+    "word_count": 98
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\ui\\input.tsx": {
+    "size": 568,
+    "mtime_ns": 1784706303305044700,
+    "word_count": 46
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\components\\ui\\label.tsx": {
+    "size": 298,
+    "mtime_ns": 1784706303306251000,
+    "word_count": 33
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\authz\\documents.ts": {
+    "size": 3395,
+    "mtime_ns": 1784707622986235900,
+    "word_count": 426
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\authz\\roles.ts": {
+    "size": 1103,
+    "mtime_ns": 1784706303309991800,
+    "word_count": 163
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\authz\\sharing.ts": {
+    "size": 2948,
+    "mtime_ns": 1784707645399228500,
+    "word_count": 353
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\authz\\versions.ts": {
+    "size": 1395,
+    "mtime_ns": 1784707632762713800,
+    "word_count": 155
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\collab\\token.ts": {
+    "size": 575,
+    "mtime_ns": 1784706303312538000,
+    "word_count": 62
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\db.ts": {
+    "size": 1190,
+    "mtime_ns": 1784707606830870900,
+    "word_count": 154
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\security\\guard.ts": {
+    "size": 1058,
+    "mtime_ns": 1784707714320781300,
+    "word_count": 144
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\security\\rate-limit.ts": {
+    "size": 1312,
+    "mtime_ns": 1784707703663874000,
+    "word_count": 187
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\utils.ts": {
+    "size": 320,
+    "mtime_ns": 1784658158651963500,
+    "word_count": 44
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\validation\\auth.ts": {
+    "size": 712,
+    "mtime_ns": 1784706303313539500,
+    "word_count": 95
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\validation\\document.ts": {
+    "size": 580,
+    "mtime_ns": 1784706303315164300,
+    "word_count": 75
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\validation\\sharing.ts": {
+    "size": 290,
+    "mtime_ns": 1784707060982718800,
+    "word_count": 34
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\lib\\validation\\version.ts": {
+    "size": 461,
+    "mtime_ns": 1784706303316181700,
+    "word_count": 50
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\middleware.ts": {
+    "size": 524,
+    "mtime_ns": 1784706303317065900,
+    "word_count": 72
+  },
+  "C:\\Users\\Dharmik Puri Goswami\\Desktop\\House of EdTech\\collabdoc\\src\\types\\next-auth.d.ts": {
+    "size": 361,
+    "mtime_ns": 1784706303318344500,
+    "word_count": 55
+  }
+}

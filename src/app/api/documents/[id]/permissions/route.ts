@@ -5,6 +5,7 @@ import { getDocumentAccess } from "@/lib/authz/documents";
 import { can } from "@/lib/authz/roles";
 import { listCollaborators, shareDocument } from "@/lib/authz/sharing";
 import { shareDocumentSchema } from "@/lib/validation/sharing";
+import { checkBodySize, checkRateLimit } from "@/lib/security/guard";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,11 +18,16 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  return NextResponse.json({ collaborators: await listCollaborators(id) });
+  return NextResponse.json({ collaborators: await listCollaborators(session.user.id, id) });
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const limited = checkRateLimit(request, "share", 20, 60_000);
+  if (limited) return limited;
+  const tooLarge = checkBodySize(request, 4_096);
+  if (tooLarge) return tooLarge;
+
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -40,6 +46,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const result = await shareDocument({
+    actorId: session.user.id,
     documentId: id,
     email: parsed.data.email,
     role: parsed.data.role,

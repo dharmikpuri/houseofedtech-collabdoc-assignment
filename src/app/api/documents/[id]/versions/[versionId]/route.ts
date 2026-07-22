@@ -15,7 +15,7 @@ export async function GET(
   const access = await getDocumentAccess(session.user.id, id);
   if (!access) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const version = await getVersionContent(id, versionId);
+  const version = await getVersionContent(session.user.id, id, versionId);
   if (!version) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   return NextResponse.json({ content: version.content });
