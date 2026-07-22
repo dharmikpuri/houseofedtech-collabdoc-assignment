@@ -9,7 +9,13 @@ const eslintConfig = [
   ...coreWebVitals,
   ...typescript,
   {
-    ignores: [".next/**", "node_modules/**", "next-env.d.ts", "src/generated/**"],
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "next-env.d.ts",
+      "src/generated/**",
+      "collab-server/**",
+    ],
   },
 ];
 
