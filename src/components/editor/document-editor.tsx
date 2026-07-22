@@ -29,11 +29,13 @@ export function DocumentEditor({
   editable,
   user,
   initialVersions,
+  aiEnabled,
 }: {
   documentId: string;
   editable: boolean;
   user: { id: string; name: string };
   initialVersions: VersionSummary[];
+  aiEnabled: boolean;
 }) {
   const [ydoc] = useState(() => new Y.Doc());
   const [provider, setProvider] = useState<HocuspocusProvider | null>(null);
@@ -116,6 +118,7 @@ export function DocumentEditor({
         documentId={documentId}
         editor={editor}
         canManage={editable}
+        aiEnabled={aiEnabled}
         initialVersions={initialVersions}
       />
     </div>

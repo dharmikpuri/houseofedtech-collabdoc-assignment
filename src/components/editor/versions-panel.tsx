@@ -16,15 +16,19 @@ export function VersionsPanel({
   documentId,
   editor,
   canManage,
+  aiEnabled,
   initialVersions,
 }: {
   documentId: string;
   editor: Editor | null;
   canManage: boolean;
+  aiEnabled: boolean;
   initialVersions: VersionSummary[];
 }) {
   const [versions, setVersions] = useState<VersionSummary[]>(initialVersions);
   const [busy, setBusy] = useState(false);
+  const [summaries, setSummaries] = useState<Record<string, string>>({});
+  const [summarizingId, setSummarizingId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     const res = await fetch(`/api/documents/${documentId}/versions`);
@@ -77,6 +81,23 @@ export function VersionsPanel({
     setBusy(false);
   }
 
+  async function handleSummarize(version: VersionSummary) {
+    if (!editor) return;
+    setSummarizingId(version.id);
+    setSummaries((prev) => ({ ...prev, [version.id]: "" }));
+    const res = await fetch(`/api/documents/${documentId}/versions/${version.id}/summary`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentContent: editor.getJSON() }),
+    });
+    const data = (await res.json().catch(() => ({}))) as { summary?: string; error?: string };
+    setSummaries((prev) => ({
+      ...prev,
+      [version.id]: data.summary ?? data.error ?? "Could not generate a summary.",
+    }));
+    setSummarizingId(null);
+  }
+
   return (
     <aside className="border-border shrink-0 rounded-lg border p-4 lg:w-72">
       <div className="flex items-center justify-between">
@@ -103,15 +124,32 @@ export function VersionsPanel({
               <p className="text-muted-foreground text-xs">
                 {version.authorName} · {new Date(version.createdAt).toLocaleString()}
               </p>
-              {canManage && (
-                <Button
-                  variant="ghost"
-                  onClick={() => handleRestore(version)}
-                  disabled={busy}
-                  className="mt-1 h-7 px-2 text-xs"
-                >
-                  Restore
-                </Button>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {canManage && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleRestore(version)}
+                    disabled={busy}
+                    className="h-7 px-2 text-xs"
+                  >
+                    Restore
+                  </Button>
+                )}
+                {aiEnabled && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSummarize(version)}
+                    disabled={summarizingId === version.id || !editor}
+                    className="h-7 px-2 text-xs"
+                  >
+                    {summarizingId === version.id ? "Analysing…" : "What changed since?"}
+                  </Button>
+                )}
+              </div>
+              {summaries[version.id] && (
+                <p className="text-muted-foreground mt-1 text-xs whitespace-pre-line">
+                  {summaries[version.id]}
+                </p>
               )}
             </li>
           ))}
