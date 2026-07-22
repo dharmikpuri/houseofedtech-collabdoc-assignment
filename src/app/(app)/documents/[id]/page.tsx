@@ -5,8 +5,10 @@ import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { getDocumentAccess } from "@/lib/authz/documents";
 import { listVersions } from "@/lib/authz/versions";
+import { listCollaborators } from "@/lib/authz/sharing";
 import { can } from "@/lib/authz/roles";
 import { RoleBadge } from "@/components/documents/role-badge";
+import { ShareDialog } from "@/components/documents/share-dialog";
 import { DocumentTitle } from "@/components/documents/document-title";
 import { DocumentEditor } from "@/components/editor/document-editor";
 import { renameDocumentAction } from "./actions";
@@ -24,10 +26,12 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
   if (!doc) notFound();
 
   const canEdit = can(doc.role, "edit");
+  const canManage = can(doc.role, "manageSharing");
   const versions = (await listVersions(doc.id)).map((version) => ({
     ...version,
     createdAt: version.createdAt.toISOString(),
   }));
+  const collaborators = canManage ? await listCollaborators(doc.id) : [];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
@@ -44,7 +48,10 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
             onRename={renameDocumentAction}
           />
         </div>
-        <RoleBadge role={doc.role} className="mt-1 shrink-0" />
+        <div className="mt-1 flex shrink-0 items-center gap-2">
+          {canManage && <ShareDialog documentId={doc.id} initialCollaborators={collaborators} />}
+          <RoleBadge role={doc.role} />
+        </div>
       </div>
 
       {!canEdit && (
