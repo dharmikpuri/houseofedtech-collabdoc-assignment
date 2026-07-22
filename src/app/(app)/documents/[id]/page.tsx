@@ -49,7 +49,14 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
       )}
 
       <div className="mt-6">
-        <DocumentEditor documentId={doc.id} editable={canEdit} />
+        <DocumentEditor
+          documentId={doc.id}
+          editable={canEdit}
+          user={{
+            id: session.user.id,
+            name: session.user.name ?? session.user.email ?? "Anonymous",
+          }}
+        />
       </div>
     </div>
   );
