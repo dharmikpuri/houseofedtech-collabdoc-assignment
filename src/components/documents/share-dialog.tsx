@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,24 +32,45 @@ export function ShareDialog({
     event.preventDefault();
     setError(null);
     setBusy(true);
-    const res = await fetch(`/api/documents/${documentId}/permissions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim(), role }),
-    });
+
+    let res: Response;
+    try {
+      res = await fetch(`/api/documents/${documentId}/permissions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), role }),
+      });
+    } catch {
+      setError("Network error — make sure you are online.");
+      setBusy(false);
+      return;
+    }
+
+    // API always returns JSON; if it doesn't (e.g. a stale 404 HTML page) fall back gracefully.
     const data = (await res.json().catch(() => ({}))) as {
       collaborator?: Collaborator;
       error?: string;
     };
+
     if (!res.ok || !data.collaborator) {
-      setError(data.error ?? "Could not share the document");
+      // Give the most helpful message possible:
+      // • API returns explicit error string → use it directly
+      // • 404 without JSON → document not found (stale page, re-open the doc)
+      // • anything else → generic fallback
+      const fallback =
+        res.status === 404
+          ? "Document not found — try refreshing the page."
+          : "Could not share the document. Please try again.";
+      setError(data.error ?? fallback);
       setBusy(false);
       return;
     }
+
     const added = data.collaborator;
     setCollaborators((prev) => [...prev.filter((c) => c.userId !== added.userId), added]);
     setEmail("");
     setBusy(false);
+    toast.success(`Shared with ${added.name} as ${ROLE_LABELS[added.role]}`);
   }
 
   async function handleRemove(userId: string) {
@@ -56,7 +78,12 @@ export function ShareDialog({
     const res = await fetch(`/api/documents/${documentId}/permissions/${userId}`, {
       method: "DELETE",
     });
-    if (res.ok) setCollaborators((prev) => prev.filter((c) => c.userId !== userId));
+    if (res.ok) {
+      setCollaborators((prev) => prev.filter((c) => c.userId !== userId));
+      toast.success("Access removed");
+    } else {
+      toast.error("Could not remove access");
+    }
     setBusy(false);
   }
 

@@ -3,9 +3,8 @@
  *
  * Roles are scoped to a document (a user can be an Owner of one doc and a
  * Viewer of another), so this lives in authz rather than on the User model.
- * The document/permission tables that consume it arrive in Phase 3, but the
- * capability matrix is defined now as pure, testable logic — it's the single
- * source of truth that both the REST API and the real-time server will use.
+ * The capability matrix is pure, testable logic — the single source of truth
+ * that the REST API, the real-time server, and the RLS policies all defer to.
  */
 
 export const ROLES = ["OWNER", "EDITOR", "VIEWER"] as const;

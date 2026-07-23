@@ -1,9 +1,11 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "react-toastify";
 
 import { deleteDocumentAction } from "@/app/(app)/dashboard/actions";
 import { Button } from "@/components/ui/button";
+import { confirmToast } from "@/components/ui/confirm-toast";
 
 /**
  * Client-side so we can confirm before deleting and show a pending state.
@@ -12,9 +14,16 @@ import { Button } from "@/components/ui/button";
 export function DeleteDocumentButton({ documentId, title }: { documentId: string; title: string }) {
   const [isPending, startTransition] = useTransition();
 
-  function handleDelete() {
-    if (!window.confirm(`Delete "${title}"? You won't be able to undo this from the UI.`)) return;
-    startTransition(() => deleteDocumentAction(documentId));
+  async function handleDelete() {
+    const confirmed = await confirmToast(
+      `Delete "${title}"? You won't be able to undo this from the UI.`,
+      "Delete",
+    );
+    if (!confirmed) return;
+    startTransition(() => {
+      deleteDocumentAction(documentId);
+      toast.success("Document deleted");
+    });
   }
 
   return (

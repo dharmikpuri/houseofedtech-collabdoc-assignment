@@ -1,17 +1,19 @@
 -- Row-Level Security backstop.
 --
--- Prisma connects as the database owner, which bypasses RLS. So the app's
--- request path downgrades to a restricted, non-owner role (app_user) for the
--- duration of each transaction via `SET LOCAL ROLE app_user` + a per-request
--- `app.user_id` setting. RLS is then enforced against that role. Migrations and
--- the collab server keep connecting as the owner and are unaffected.
+-- These policies scope every row to the user in `app.user_id` (set per request
+-- in withUser). The app connects as the database owner, which bypasses RLS, so
+-- the policies sit behind the app-layer authz checks as defense in depth; they
+-- enforce for any non-owner role that ever touches these tables. A restricted
+-- `app_user` role is provisioned so the app path can be switched to enforced RLS
+-- later without another migration.
 --
 -- Access checks use SECURITY DEFINER helper functions. They run as the function
 -- owner (the table owner, which is not FORCEd), so they read the permission
 -- tables without RLS — avoiding the classic policy-recursion problem.
 
--- Restricted role the app runs as. Roles are cluster-global, and Prisma's shadow
--- database shares the cluster, so guard creation to stay idempotent.
+-- Restricted role, provisioned for future enforcement. Roles are cluster-global,
+-- and Prisma's shadow database shares the cluster, so guard creation to stay
+-- idempotent.
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_user') THEN
@@ -20,7 +22,6 @@ BEGIN
 END
 $$;
 
-GRANT app_user TO CURRENT_USER;
 GRANT USAGE ON SCHEMA public TO app_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON documents, document_permissions, versions TO app_user;
 GRANT SELECT ON users TO app_user;

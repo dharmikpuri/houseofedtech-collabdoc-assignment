@@ -6,7 +6,8 @@
   "description": "Yjs real-time collaboration WebSocket server for CollabDoc",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts"
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hocuspocus/extension-database": "^4.4.0",
