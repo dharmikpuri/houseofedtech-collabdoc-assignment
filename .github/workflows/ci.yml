@@ -39,3 +39,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Install collab-server dependencies
+        run: npm --prefix collab-server ci
+
+      - name: Typecheck collab-server
+        run: npm --prefix collab-server run typecheck

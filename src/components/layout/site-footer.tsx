@@ -1,13 +1,10 @@
 /**
- * Global footer. The assignment requires the author's name, GitHub, and LinkedIn
- * on every page (submission guideline R-32), so this lives in the root layout.
- *
- * TODO(dharmik): replace the two URLs below with your real profile links.
+ * Global footer with the author's name, GitHub, and LinkedIn on every page.
  */
 const AUTHOR = {
   name: "Dharmik Puri Goswami",
-  github: "https://github.com/your-username",
-  linkedin: "https://www.linkedin.com/in/your-handle",
+  github: "https://github.com/dharmikpuri",
+  linkedin: "https://www.linkedin.com/in/dharmikpurigoswami/",
 };
 
 export function SiteFooter() {

@@ -20,13 +20,14 @@ if (process.env.NODE_ENV !== "production") {
 export type TxClient = Prisma.TransactionClient;
 
 /**
- * Run a unit of work as the restricted `app_user` role with the caller's id in
- * scope, so Postgres row-level security enforces per-user access. The role
- * switch and `app.user_id` setting are transaction-local and reset on commit.
+ * Run a unit of work with the caller's id set in `app.user_id` for the
+ * transaction, so the row-level-security policies can scope every row to the
+ * user. The app connects as the database owner (which bypasses RLS), so the
+ * policies act as a backstop behind the app-layer authz checks; pointing Prisma
+ * at the restricted `app_user` role would enforce them on this path too.
  */
 export function withUser<T>(userId: string, fn: (tx: TxClient) => Promise<T>): Promise<T> {
   return prisma.$transaction(async (tx) => {
-    await tx.$executeRawUnsafe("SET LOCAL ROLE app_user");
     await tx.$queryRaw`SELECT set_config('app.user_id', ${userId}, true)`;
     return fn(tx);
   });
