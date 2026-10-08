@@ -4,7 +4,9 @@ import { auth } from "@/auth";
 import { getDocumentAccess } from "@/lib/authz/documents";
 import { getVersionContent } from "@/lib/authz/versions";
 import { extractText } from "@/lib/ai/text";
-import { isAiEnabled, summarizeChanges } from "@/lib/ai/gemini";
+import { isAiEnabled } from "@/lib/ai/gemini";
+import { summarizeChanges } from "@/lib/ai/tasks";
+import { aiErrorMessage, aiErrorStatus } from "@/lib/ai/provider";
 import { checkBodySize, checkRateLimit } from "@/lib/security/guard";
 import { MAX_SUMMARY_CONTENT_BYTES, summaryRequestSchema } from "@/lib/validation/summary";
 
@@ -13,7 +15,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string; versionId: string }> },
 ) {
   const { id, versionId } = await params;
-  const limited = checkRateLimit(request, "summary", 15, 60_000);
+  const limited = await checkRateLimit(request, "summary", 15, 60_000);
   if (limited) return limited;
   const tooLarge = checkBodySize(request, MAX_SUMMARY_CONTENT_BYTES + 2_048);
   if (tooLarge) return tooLarge;
@@ -45,7 +47,9 @@ export async function POST(
   try {
     const summary = await summarizeChanges(oldText, newText);
     return NextResponse.json({ summary });
-  } catch {
-    return NextResponse.json({ error: "Could not generate a summary right now" }, { status: 502 });
+  } catch (error) {
+    // The provider maps vendor failures onto a small set of kinds, so the route
+    // can return an accurate status without knowing anything about Gemini.
+    return NextResponse.json({ error: aiErrorMessage(error) }, { status: aiErrorStatus(error) });
   }
 }

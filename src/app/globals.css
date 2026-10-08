@@ -2,46 +2,276 @@
 @plugin "@tailwindcss/typography";
 
 /*
- * Design tokens as CSS variables so shadcn/ui components (added when we need them)
- * inherit the theme automatically. Light + dark are both defined up front.
+ * Design tokens.
+ *
+ * Light and dark are both defined as explicit palettes rather than filters so
+ * each mode can be tuned independently — dark mode lifts the surface off pure
+ * black (#0a0a0a is harsh at editor-length reading sessions) and desaturates
+ * the accent so it doesn't glow against a dark field.
+ *
+ * Theme switching is class-based (`.dark` on <html>) and driven by next-themes,
+ * so a user's choice survives reloads and can override the OS preference.
  */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  /* Surfaces. A clean white canvas; `subtle` is the cool grey used for
+     alternating sections, the sidebar and inset panels. */
   --background: #ffffff;
-  --foreground: #0a0a0a;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --border: #e4e4e7;
-  --primary: #4f46e5;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --overlay: #ffffff;
+
+  /* Text is a deep navy rather than pure black: it reads as ink on white and
+     sits naturally beside the brand colour. */
+  --foreground: #0f1326;
+  --muted: #eef0f6;
+  --muted-foreground: #5a6178;
+  --subtle: #f6f7fb;
+
+  --border: #e4e7ee;
+  --border-strong: #cdd2de;
+  --input: #ffffff;
+  --ring: #4f5ff5;
+
+  /* Brand: indigo. `primary` is the accent for text, icons and tints;
+     `primary-solid` is the filled-button colour (they differ in dark mode,
+     where text needs a lighter tone than a fill does). */
+  --primary: #4f5ff5;
+  --primary-hover: #3f4ede;
   --primary-foreground: #ffffff;
+  --primary-subtle: #eef0ff;
+  --primary-solid: #4f5ff5;
+  --primary-solid-hover: #4150e2;
+
+  /* Ink: the navy used for inverted panels and quiet buttons. */
+  --ink: #0f1326;
+  --ink-foreground: #ffffff;
+
+  /* Semantic states. Each has a text-safe and a subtle-background variant so
+     badges and banners stay AA-contrast in both modes. */
+  --success: #0c8a56;
+  --success-subtle: #e6f7ee;
+  --warning: #b25e09;
+  --warning-subtle: #fdf3e1;
+  --danger: #d6331f;
+  --danger-hover: #b3281a;
+  --danger-subtle: #fdeeec;
+  --info: #1668c7;
+  --info-subtle: #e8f1fd;
+
   --radius: 0.5rem;
+  --radius-sm: 0.375rem;
+  --radius-lg: 0.625rem;
+
+  --shadow-xs: 0 1px 2px 0 rgb(15 19 38 / 0.05);
+  --shadow-sm: 0 1px 2px 0 rgb(15 19 38 / 0.05), 0 2px 6px -1px rgb(15 19 38 / 0.06);
+  --shadow-md: 0 2px 4px -1px rgb(15 19 38 / 0.05), 0 12px 24px -8px rgb(15 19 38 / 0.12);
+  --shadow-lg: 0 4px 8px -2px rgb(15 19 38 / 0.06), 0 28px 60px -18px rgb(15 19 38 / 0.22);
+  --shadow-button:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.18), 0 1px 2px 0 rgb(15 19 38 / 0.18),
+    0 4px 10px -4px rgb(79 95 245 / 0.5);
+
+  /* A very pale brand tint behind the marketing hero. */
+  --wash: radial-gradient(70% 60% at 50% 0%, rgb(79 95 245 / 0.1), transparent 70%);
+  --dot: rgb(15 19 38 / 0.09);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #fafafa;
-    --muted: #18181b;
-    --muted-foreground: #a1a1aa;
-    --border: #27272a;
-    --primary: #6366f1;
-    --primary-foreground: #ffffff;
-  }
+.dark {
+  /* Deep navy, stepped so layers stay legible. */
+  --background: #0a0c16;
+  --surface: #11131f;
+  --surface-raised: #161927;
+  --overlay: #191c2b;
+
+  --foreground: #e9ebf4;
+  --muted: #1c2031;
+  --muted-foreground: #959bb3;
+  --subtle: #0d0f1b;
+
+  --border: #222638;
+  --border-strong: #33384f;
+  --input: #11131f;
+  --ring: #8f9bff;
+
+  --primary: #8f9bff;
+  --primary-hover: #a9b3ff;
+  --primary-foreground: #0a0c16;
+  --primary-subtle: #1b2050;
+  --primary-solid: #5565f8;
+  --primary-solid-hover: #6676ff;
+
+  --ink: #e9ebf4;
+  --ink-foreground: #0a0c16;
+
+  --success: #4ade80;
+  --success-subtle: #0d2819;
+  --warning: #f6b84b;
+  --warning-subtle: #2d2209;
+  --danger: #f47c6c;
+  --danger-hover: #f8a296;
+  --danger-subtle: #301613;
+  --info: #70a9f5;
+  --info-subtle: #10233f;
+
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 8px 20px -6px rgb(0 0 0 / 0.6), 0 2px 6px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 28px 60px -18px rgb(0 0 0 / 0.75), 0 4px 12px -4px rgb(0 0 0 / 0.5);
+  --shadow-button:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.18), 0 1px 2px 0 rgb(0 0 0 / 0.5),
+    0 4px 12px -4px rgb(85 101 248 / 0.55);
+
+  --wash: radial-gradient(70% 60% at 50% 0%, rgb(85 101 248 / 0.2), transparent 70%);
+  --dot: rgb(255 255 255 / 0.07);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-overlay: var(--overlay);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-subtle: var(--subtle);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-solid: var(--primary-solid);
+  --color-primary-solid-hover: var(--primary-solid-hover);
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-info: var(--info);
+  --color-info-subtle: var(--info-subtle);
+
+  --radius-sm: var(--radius-sm);
+  --radius-DEFAULT: var(--radius);
+  --radius-lg: var(--radius-lg);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  /* next/font exposes each family as a CSS variable on <html>. */
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-slide-in-right: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-page-in: page-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* ── Component utilities ──────────────────────────────────────────────────── */
+
+@utility shadow-button {
+  box-shadow: var(--shadow-button);
+}
+
+/* The standard card: surface, hairline border, a faint lift. */
+@utility card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+}
+
+/* Pale brand tint for the top of marketing pages. */
+@utility bg-wash {
+  background-image: var(--wash);
+}
+
+/* Dot grid for "stage" panels that hold a product visual. */
+@utility bg-dotgrid {
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Display type for page and marketing headlines. */
+@utility font-display {
+  font-family: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 750;
+  letter-spacing: -0.035em;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Expanding halo used by the "syncing" status dot. */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family:
+    var(--font-inter),
     ui-sans-serif,
     system-ui,
     -apple-system,
@@ -50,15 +280,140 @@ body {
     Helvetica,
     Arial,
     sans-serif;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* TipTap / ProseMirror editing surface */
+/* A visible, consistent focus ring for keyboard users everywhere. Mouse users
+   don't see it (:focus-visible), so it costs nothing visually. */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Respect users who ask the OS to reduce motion: keep state changes instant
+   rather than animated. */
+@media (prefers-reduced-motion: reduce) {
+  /* Loading indicators are exempt: a spinner or skeleton that stops instantly
+     stops communicating "still working", which is the opposite of helpful. */
+  *:not(.motion-essential, .animate-spin),
+  *:not(.motion-essential, .animate-spin)::before,
+  *:not(.motion-essential, .animate-spin)::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Loading states ───────────────────────────────────────────────────────── */
+
+/* Skeleton: a soft highlight sweeps across the block, so motion is visible
+   from the very first frame instead of waiting for a slow pulse to build. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--muted);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--foreground) 7%, transparent) 50%,
+    transparent 100%
+  );
+  animation: skeleton-sweep 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Page entry. `backwards` fill (not `both`) so no transform lingers after the
+   animation — a leftover transform would re-anchor position: fixed children. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+::selection {
+  background: color-mix(in oklab, var(--primary) 22%, transparent);
+}
+
+/* Slim scrollbars that match the theme instead of the OS default. */
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+    background-clip: content-box;
+  }
+}
+
+/* ── TipTap / ProseMirror editing surface ─────────────────────────────────── */
+
 .ProseMirror {
   outline: none;
 }
 
-/* Placeholder text shown when the document is empty. */
+/* Map the typography plugin's palette onto our tokens, so the document body
+   matches the app chrome in both themes. Two classes to out-rank `.prose`. */
+.ProseMirror.prose {
+  --tw-prose-body: color-mix(in oklab, var(--foreground) 88%, transparent);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-lead: var(--muted-foreground);
+  --tw-prose-links: var(--primary);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-counters: var(--muted-foreground);
+  --tw-prose-bullets: var(--border-strong);
+  --tw-prose-hr: var(--border);
+  --tw-prose-quotes: var(--muted-foreground);
+  --tw-prose-quote-borders: var(--border-strong);
+  --tw-prose-code: var(--foreground);
+  --tw-prose-pre-code: var(--foreground);
+  --tw-prose-pre-bg: var(--muted);
+  --tw-prose-th-borders: var(--border-strong);
+  --tw-prose-td-borders: var(--border);
+  --tw-prose-invert-body: color-mix(in oklab, var(--foreground) 88%, transparent);
+  --tw-prose-invert-headings: var(--foreground);
+  --tw-prose-invert-links: var(--primary);
+  --tw-prose-invert-bold: var(--foreground);
+  --tw-prose-invert-counters: var(--muted-foreground);
+  --tw-prose-invert-bullets: var(--border-strong);
+  --tw-prose-invert-hr: var(--border);
+  --tw-prose-invert-quotes: var(--muted-foreground);
+  --tw-prose-invert-quote-borders: var(--border-strong);
+  --tw-prose-invert-code: var(--foreground);
+  --tw-prose-invert-pre-code: var(--foreground);
+  --tw-prose-invert-pre-bg: var(--muted);
+  --tw-prose-invert-th-borders: var(--border-strong);
+  --tw-prose-invert-td-borders: var(--border);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -81,13 +436,249 @@ body {
 .collaboration-cursor__label {
   border-radius: 3px 3px 3px 0;
   color: #fff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   left: -1px;
   line-height: normal;
-  padding: 0.1rem 0.3rem;
+  padding: 0.1rem 0.35rem;
   position: absolute;
   top: -1.4em;
   user-select: none;
   white-space: nowrap;
+}
+
+/* The editor owns its own vertical rhythm so prose reads like a document
+   rather than a form field. */
+.ProseMirror > * + * {
+  margin-top: 0.75em;
+}
+
+.ProseMirror h1 {
+  font-size: 1.875rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  margin-top: 1.6em;
+}
+
+.ProseMirror h2 {
+  font-size: 1.4rem;
+  font-weight: 640;
+  letter-spacing: -0.015em;
+  margin-top: 1.4em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.15rem;
+  font-weight: 620;
+  margin-top: 1.2em;
+}
+
+.ProseMirror h1:first-child,
+.ProseMirror h2:first-child,
+.ProseMirror h3:first-child {
+  margin-top: 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.4rem;
+}
+
+.ProseMirror ul {
+  list-style: disc;
+}
+
+.ProseMirror ol {
+  list-style: decimal;
+}
+
+.ProseMirror li > p {
+  margin: 0;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid var(--border-strong);
+  padding-left: 1rem;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.ProseMirror pre {
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
+
+.ProseMirror code:not(pre code) {
+  background: var(--muted);
+  border-radius: 4px;
+  padding: 0.12em 0.35em;
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.87em;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.75em 0;
+}
+
+/* Links: visible, but clicking edits rather than navigates (open from the
+   link popover). */
+.ProseMirror a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: text;
+}
+
+.ProseMirror mark {
+  background: color-mix(in oklab, #facc15 45%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* Checklists. */
+.ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0.15rem;
+}
+
+.ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0.2em 0;
+  padding-left: 0;
+}
+
+/* The checkbox sits on the first line's centre: (line-height - box) / 2. */
+.ProseMirror ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: calc((1.75em - 0.95rem) / 2);
+  line-height: 0;
+  user-select: none;
+}
+
+/* The typography plugin spaces every paragraph; inside a task item that
+   pushes the text below its checkbox. */
+.ProseMirror ul[data-type="taskList"] li > div > p {
+  margin: 0;
+}
+
+.ProseMirror ul[data-type="taskList"] li > label input {
+  width: 0.95rem;
+  height: 0.95rem;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div {
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+}
+
+/* Tables. Wide tables scroll horizontally instead of breaking the layout. */
+.ProseMirror .tableWrapper {
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 0;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+  border: 1px solid var(--border-strong);
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+  min-width: 4rem;
+  position: relative;
+}
+
+.ProseMirror th {
+  background: var(--muted);
+  font-weight: 600;
+  text-align: left;
+}
+
+.ProseMirror th > p,
+.ProseMirror td > p {
+  margin: 0;
+}
+
+.ProseMirror .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklab, var(--primary) 14%, transparent);
+  pointer-events: none;
+}
+
+/* AI autocomplete ghost text: a decoration, never part of the document. */
+.ProseMirror .ai-ghost {
+  color: var(--muted-foreground);
+  opacity: 0.75;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Comment anchors are unstyled by default; CommentHighlights styles only
+   threads that exist and are open. */
+.ProseMirror .comment-anchor {
+  border-radius: 2px;
+}
+
+/* Print / "Save as PDF": only the document itself. */
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .ProseMirror .comment-anchor {
+    background: none !important;
+    border: 0 !important;
+  }
+  .collaboration-cursor__caret,
+  .collaboration-cursor__label,
+  .ProseMirror .ai-ghost {
+    display: none;
+  }
+}
+
+/* Text the AI is about to act on, so the user can see the target of the
+   operation while the bubble menu is open. */
+.ProseMirror .ai-highlight {
+  background: color-mix(in oklab, var(--primary) 18%, transparent);
+  border-radius: 3px;
+}
+
+/* ── Toast theming ────────────────────────────────────────────────────────── */
+/* react-toastify ships its own palette; map it onto our tokens so toasts match
+   the app in both themes. */
+:root {
+  --toastify-color-light: var(--overlay);
+  --toastify-color-dark: var(--overlay);
+  --toastify-text-color-light: var(--foreground);
+  --toastify-text-color-dark: var(--foreground);
+  --toastify-color-success: var(--success);
+  --toastify-color-error: var(--danger);
+  --toastify-color-warning: var(--warning);
+  --toastify-color-info: var(--info);
+  --toastify-font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --toastify-toast-min-height: 56px;
 }

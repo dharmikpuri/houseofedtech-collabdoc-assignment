@@ -16,7 +16,13 @@ import { signInSchema } from "@/lib/validation/auth";
  * - Passwords are compared with bcrypt against a stored hash — the plaintext
  *   is never persisted or logged.
  */
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const {
+  handlers,
+  signIn,
+  signOut,
+  auth,
+  unstable_update: updateSession,
+} = NextAuth({
   ...authConfig,
   providers: [
     Credentials({

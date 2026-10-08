@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     name: Lint · Typecheck · Build
@@ -25,11 +28,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
 
       - name: Lint
         run: npm run lint
@@ -45,3 +51,47 @@ jobs:
 
       - name: Typecheck collab-server
         run: npm --prefix collab-server run typecheck
+
+  collab-image:
+    name: Collab server image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the collab-server Docker image
+        run: docker build --tag collabdoc-collab:ci collab-server
+
+  # Continuous delivery for the database: apply pending migrations after a
+  # change lands on main. The app itself deploys through Vercel's Git
+  # integration and the collab server through Railway's; this keeps the schema
+  # in step with them. Skipped automatically until the secret is configured,
+  # so forks and fresh clones never fail here.
+  migrate:
+    name: Apply database migrations
+    needs: [verify, collab-image]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        if: env.DATABASE_URL != ''
+
+      - uses: actions/setup-node@v4
+        if: env.DATABASE_URL != ''
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: env.DATABASE_URL != ''
+        run: npm ci
+
+      - name: prisma migrate deploy
+        if: env.DATABASE_URL != ''
+        run: npx prisma migrate deploy
+
+      - name: Skipped (no DATABASE_URL secret)
+        if: env.DATABASE_URL == ''
+        run: echo "Set the DATABASE_URL and DIRECT_URL secrets in the 'production' environment to enable automatic migrations."

@@ -6,14 +6,14 @@ import { clientIp, rateLimit } from "@/lib/security/rate-limit";
  * Rate-limit a request by client IP scoped to a named bucket. Returns a 429
  * response to return early, or null when the request may proceed.
  */
-export function checkRateLimit(
+export async function checkRateLimit(
   request: Request,
   bucket: string,
   limit: number,
   windowMs: number,
-): NextResponse | null {
+): Promise<NextResponse | null> {
   const key = `${bucket}:${clientIp(request.headers)}`;
-  const result = rateLimit(key, limit, windowMs);
+  const result = await rateLimit(key, limit, windowMs);
   if (result.ok) return null;
   return NextResponse.json(
     { error: "Too many requests. Please slow down." },

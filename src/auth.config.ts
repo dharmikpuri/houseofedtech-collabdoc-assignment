@@ -9,7 +9,7 @@ import type { NextAuthConfig } from "next-auth";
 
 // Routes that require a signed-in user. Anything under these is gated by the
 // `authorized` callback below (which middleware runs on every matched request).
-const PROTECTED_PREFIXES = ["/dashboard", "/documents"];
+const PROTECTED_PREFIXES = ["/dashboard", "/documents", "/search", "/settings"];
 
 export const authConfig = {
   // Honour the deployment host when validating callback/redirect URLs.
@@ -36,8 +36,14 @@ export const authConfig = {
 
       return true;
     },
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user?.id) token.id = user.id;
+      // A profile edit refreshes the display name in the session without a new
+      // sign-in. Only the name is accepted from the update payload.
+      const name = (session as { user?: { name?: unknown } } | undefined)?.user?.name;
+      if (trigger === "update" && typeof name === "string" && name.trim()) {
+        token.name = name.trim().slice(0, 80);
+      }
       return token;
     },
     session({ session, token }) {

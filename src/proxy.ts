@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import { authConfig } from "@/auth.config";
 
-// Middleware runs on the edge, so it uses only the edge-safe config (no Prisma).
+// Proxy (formerly middleware) runs on the edge, so it uses only the edge-safe config (no Prisma).
 // The `authorized` callback in authConfig decides who may access what.
 // Exported as a default function so Next.js can detect it statically.
 export default NextAuth(authConfig).auth;
