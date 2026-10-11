@@ -32,6 +32,17 @@ model User {
   permissions    DocumentPermission[]
   versions       Version[]
 
+  folders              Folder[]
+  documentMeta         UserDocumentMeta[]
+  commentThreads       CommentThread[]    @relation("ThreadAuthor")
+  resolvedThreads      CommentThread[]    @relation("ThreadResolver")
+  comments             Comment[]
+  notifications        Notification[]     @relation("NotificationRecipient")
+  notificationsCreated Notification[]     @relation("NotificationActor")
+  activities           DocumentActivity[]
+  shareLinks           ShareLink[]
+  passwordResetTokens  PasswordResetToken[]
+
   @@map("users")
 }
 
@@ -44,9 +55,17 @@ model Document {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // soft delete — rows are hidden, never hard-deleted
 
-  permissions DocumentPermission[]
-  state       DocumentState?
-  versions    Version[]
+  permissions    DocumentPermission[]
+  state          DocumentState?
+  versions       Version[]
+  userMeta       UserDocumentMeta[]
+  commentThreads CommentThread[]
+  notifications  Notification[]
+  activities     DocumentActivity[]
+  shareLinks     ShareLink[]
+  chunks         DocumentChunk[]
+  searchIndex    DocumentIndex?
+  tags           DocumentTag[]
 
   @@index([ownerId])
   @@index([deletedAt])
@@ -64,7 +83,14 @@ model Version {
   label      String
   content    Json
   createdAt  DateTime @default(now())
+  // Idempotency key minted on the client when a snapshot is queued (possibly
+  // while offline). A retried or duplicated delivery of the same queued
+  // mutation resolves to the existing row instead of creating a second one.
+  // Nullable: snapshots taken before the offline queue existed have none, and
+  // Postgres unique indexes ignore NULLs.
+  clientMutationId String?
 
+  @@unique([documentId, clientMutationId])
   @@index([documentId, createdAt])
   @@map("versions")
 }
@@ -94,4 +120,208 @@ model DocumentPermission {
   @@unique([documentId, userId])
   @@index([userId])
   @@map("document_permissions")
+}
+
+// ── Workspace organisation (per user) ────────────────────────────────────────
+// Documents are shared, but how each person organises them is personal: Alice
+// filing a shared doc under "Q3" must not move it for Bob. So folders and
+// favourites belong to the user, not the document.
+
+model Folder {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime @default(now())
+
+  documents UserDocumentMeta[]
+
+  @@index([userId])
+  @@map("folders")
+}
+
+// A user's personal metadata about one document they can access.
+model UserDocumentMeta {
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentId   String
+  document     Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  favorite     Boolean   @default(false)
+  // Deleting a folder un-files its documents rather than deleting them.
+  folderId     String?
+  folder       Folder?   @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  lastOpenedAt DateTime?
+
+  @@id([userId, documentId])
+  @@index([userId, lastOpenedAt])
+  @@index([folderId])
+  @@map("user_document_meta")
+}
+
+// ── Comments ─────────────────────────────────────────────────────────────────
+// The thread's *anchor* lives in the CRDT as a mark carrying the thread id, so
+// it moves with concurrent edits and merges like any other text. The thread's
+// *conversation* lives here, where it can be authorised, queried and notified.
+
+model CommentThread {
+  id           String    @id
+  documentId   String
+  document     Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User      @relation("ThreadAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  // The selected text when the thread was opened, kept so the conversation
+  // still makes sense if the anchored text is later deleted.
+  quote        String
+  resolvedAt   DateTime?
+  resolvedById String?
+  resolvedBy   User?     @relation("ThreadResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  comments Comment[]
+
+  @@index([documentId, createdAt])
+  @@map("comment_threads")
+}
+
+model Comment {
+  id        String        @id @default(cuid())
+  threadId  String
+  thread    CommentThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String
+  // User ids mentioned with @; each receives a notification.
+  mentions  String[]      @default([])
+  createdAt DateTime      @default(now())
+
+  @@index([threadId, createdAt])
+  @@map("comments")
+}
+
+model Notification {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actorId    String
+  actor      User      @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  documentId String
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  // "mention" | "share"
+  type       String
+  threadId   String?
+  preview    String
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// Append-only audit trail of what happened to a document and who did it.
+// Written in the same transaction as the change it records, so the feed can
+// never claim something that didn't happen (or miss something that did).
+model DocumentActivity {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  type       String
+  meta       Json?
+  createdAt  DateTime @default(now())
+
+  @@index([documentId, createdAt])
+  @@map("document_activity")
+}
+
+// Invite-by-link. Only a SHA-256 of the token is stored, so a database leak
+// doesn't leak working invitations; the raw token is shown once, at creation.
+model ShareLink {
+  id          String    @id @default(cuid())
+  documentId  String
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  tokenHash   String    @unique
+  // EDITOR or VIEWER — never OWNER (enforced in validation).
+  role        Role
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  useCount    Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([documentId])
+  @@map("share_links")
+}
+
+// Single-use password reset. Only a SHA-256 of the emailed token is stored, it
+// expires quickly, and redeeming it marks it used in the same statement that
+// checks it — so a link can't be replayed or raced.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+// ── AI: semantic search & tags ───────────────────────────────────────────────
+
+// A passage of a document with its embedding, for semantic search and for
+// retrieval-augmented answers across the workspace. Written with raw SQL
+// because Prisma can't bind the pgvector type directly.
+model DocumentChunk {
+  id         String                       @id
+  documentId String
+  document   Document                     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunkIndex Int
+  content    String
+  embedding  Unsupported("vector(768)")?
+  createdAt  DateTime                     @default(now())
+
+  @@unique([documentId, chunkIndex])
+  @@map("document_chunks")
+}
+
+// What was last indexed for a document. The content hash lets re-indexing be
+// skipped entirely when the text hasn't changed — embeddings cost money.
+model DocumentIndex {
+  documentId  String   @id
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  contentHash String
+  chunkCount  Int
+  indexedAt   DateTime @default(now())
+
+  @@map("document_index")
+}
+
+// Tags belong to the document (unlike folders), so every collaborator sees
+// them. Normalised to lowercase slugs in the application.
+model DocumentTag {
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  tag        String
+  createdAt  DateTime @default(now())
+
+  @@id([documentId, tag])
+  @@index([tag])
+  @@map("document_tags")
+}
+
+// Keep-alive marker. A free Supabase project pauses after a week without
+// database activity, so the daily cron route and the collab server each
+// upsert their own row here — a real write, which a bare connection is not.
+// RLS is on with no policy: only the owner connection touches it.
+model Heartbeat {
+  source String   @id
+  beatAt DateTime @default(now()) @map("beat_at")
+  beats  Int      @default(1)
+
+  @@map("heartbeats")
 }

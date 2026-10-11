@@ -9,7 +9,7 @@ import { checkBodySize, checkRateLimit } from "@/lib/security/guard";
 const bodySchema = z.object({ documentId: z.string().min(1).max(64) });
 
 export async function POST(request: Request) {
-  const limited = checkRateLimit(request, "collab-token", 60, 60_000);
+  const limited = await checkRateLimit(request, "collab-token", 60, 60_000);
   if (limited) return limited;
   const tooLarge = checkBodySize(request, 1_024);
   if (tooLarge) return tooLarge;

@@ -1,14 +1,24 @@
 import type { Metadata } from "next";
 import { AuthForm } from "../auth-form";
+import { safeRedirectPath } from "@/lib/security/redirect";
 
 export const metadata: Metadata = { title: "Create account" };
 
-export default function SignUpPage() {
+export default async function SignUpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  const { callbackUrl } = await searchParams;
+  const destination = callbackUrl ? safeRedirectPath(callbackUrl) : undefined;
+
   return (
     <div>
-      <h1 className="text-xl font-semibold">Create your account</h1>
-      <p className="text-muted-foreground mt-1 mb-6 text-sm">Start writing in seconds.</p>
-      <AuthForm mode="sign-up" />
+      <h1 className="page-title">Create your workspace</h1>
+      <p className="text-muted-foreground mt-1.5 mb-8 text-sm">
+        Start writing in seconds. It works offline from the very first keystroke.
+      </p>
+      <AuthForm mode="sign-up" callbackUrl={destination} />
     </div>
   );
 }

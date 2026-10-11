@@ -6,6 +6,10 @@ const BLOCK_TYPES = new Set([
   "codeBlock",
   "bulletList",
   "orderedList",
+  "taskList",
+  "taskItem",
+  "table",
+  "tableRow",
 ]);
 
 type Node = { type?: string; text?: string; content?: Node[] };

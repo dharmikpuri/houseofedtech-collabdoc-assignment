@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const limited = checkRateLimit(request, "share", 20, 60_000);
+  const limited = await checkRateLimit(request, "share", 20, 60_000);
   if (limited) return limited;
   const tooLarge = checkBodySize(request, 4_096);
   if (tooLarge) return tooLarge;
