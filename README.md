@@ -210,9 +210,11 @@ Generate each secret with:
 node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
 ```
 
-> **Connection note:** use the **direct/session** Postgres connection (port `5432`), not the
-> transaction pooler. The app uses Prisma interactive transactions, which need a session-mode
-> connection.
+> **Connection note:** use a **session-mode** Postgres connection (port `5432`), not the
+> transaction pooler (`6543`) — the app uses Prisma interactive transactions. Supabase's direct
+> host (`db.<ref>.supabase.co`) is IPv6-only, which works on most home networks but **not on
+> Vercel or Railway**: in production use Supabase → Connect → **Session pooler**
+> (`aws-…pooler.supabase.com:5432`), which is IPv4 and session mode.
 
 `.env` is git-ignored; never commit real values.
 
@@ -341,8 +343,8 @@ health check):
 
 ### Database → Supabase
 
-Use the direct/session connection string for `DATABASE_URL` and `DIRECT_URL` (see the connection
-note above). Migrations include the RLS policies and enable `pgvector`.
+Use the **Session pooler** connection string for `DATABASE_URL` and `DIRECT_URL` on Vercel and
+Railway (see the connection note above — the direct host is IPv6-only). Migrations include the RLS policies and enable `pgvector`.
 
 ### Keeping a free Supabase project awake
 
