@@ -8,6 +8,7 @@ import { requestPasswordReset, resetPassword } from "@/lib/auth/password-reset";
 import { isEmailAvailable } from "@/lib/email/send";
 import { clientIp, rateLimit } from "@/lib/security/rate-limit";
 import { forgotPasswordSchema, resetPasswordSchema } from "@/lib/validation/auth";
+import { ROUTES } from "@/config/routes";
 
 export type ForgotState = { error?: string; sent?: boolean };
 export type ResetState = { error?: string };
@@ -75,5 +76,5 @@ export async function resetPasswordAction(
     };
   }
 
-  redirect("/sign-in?reset=1");
+  redirect(`${ROUTES.signIn}?reset=1`);
 }

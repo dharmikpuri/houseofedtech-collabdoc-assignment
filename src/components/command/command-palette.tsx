@@ -31,6 +31,13 @@ import { toast } from "react-toastify";
 
 import { cn } from "@/lib/utils";
 import { dispatchCommand } from "@/lib/commands/bus";
+import {
+  DOCUMENTS_PREFIX,
+  ROUTES,
+  dashboardViewPath,
+  documentPath,
+  searchPath,
+} from "@/config/routes";
 
 type PaletteDocument = {
   id: string;
@@ -111,7 +118,7 @@ function PaletteBody({ close }: { close: () => void }) {
     };
   }, []);
 
-  const inDocument = pathname.startsWith("/documents/");
+  const inDocument = pathname.startsWith(`${DOCUMENTS_PREFIX}/`);
 
   const items = useMemo<Item[]>(() => {
     const go = (href: string) => () => {
@@ -140,7 +147,7 @@ function PaletteBody({ close }: { close: () => void }) {
       group: needle ? "Documents" : "Recently opened",
       label: doc.title,
       icon: doc.favorite ? Star : FileText,
-      run: go(`/documents/${doc.id}`),
+      run: go(documentPath(doc.id)),
     }));
 
     const actions: Item[] = [
@@ -150,7 +157,7 @@ function PaletteBody({ close }: { close: () => void }) {
         label: needle ? `Ask AI: “${query.trim()}”` : "Ask AI about your documents",
         icon: Sparkles,
         keywords: "ask question ai search semantic",
-        run: go(needle ? `/search?q=${encodeURIComponent(query.trim())}` : "/search"),
+        run: go(needle ? searchPath(query.trim()) : ROUTES.search),
       },
       {
         id: "new",
@@ -172,7 +179,7 @@ function PaletteBody({ close }: { close: () => void }) {
             });
             const data = (await res.json()) as { id?: string };
             if (!res.ok || !data.id) throw new Error();
-            router.push(`/documents/${data.id}`);
+            router.push(documentPath(data.id));
           } catch {
             toast.error("Couldn't create a document.");
           }
@@ -286,7 +293,7 @@ function PaletteBody({ close }: { close: () => void }) {
         label: "All documents",
         icon: Inbox,
         keywords: "dashboard home",
-        run: go("/dashboard"),
+        run: go(ROUTES.dashboard),
       },
       {
         id: "g-fav",
@@ -294,21 +301,21 @@ function PaletteBody({ close }: { close: () => void }) {
         label: "Favourites",
         icon: Star,
         keywords: "starred",
-        run: go("/dashboard?view=favorites"),
+        run: go(dashboardViewPath("favorites")),
       },
       {
         id: "g-recent",
         group: "Go to",
         label: "Recent",
         icon: Clock,
-        run: go("/dashboard?view=recent"),
+        run: go(dashboardViewPath("recent")),
       },
       {
         id: "g-shared",
         group: "Go to",
         label: "Shared with me",
         icon: Users,
-        run: go("/dashboard?view=shared"),
+        run: go(dashboardViewPath("shared")),
       },
       {
         id: "g-lab",
@@ -316,7 +323,7 @@ function PaletteBody({ close }: { close: () => void }) {
         label: "Sync lab",
         icon: FlaskConical,
         keywords: "demo crdt offline",
-        run: go("/lab"),
+        run: go(ROUTES.lab),
       },
       {
         id: "t-light",

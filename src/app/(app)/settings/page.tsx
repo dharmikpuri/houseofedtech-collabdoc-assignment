@@ -5,26 +5,27 @@ import { KeyRound, UserRound } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { Avatar } from "@/components/ui/avatar";
+import { PageHeader } from "@/components/ui/page-header";
 import { PasswordForm, ProfileForm } from "./settings-forms";
+import { ROUTES } from "@/config/routes";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const session = await auth();
-  if (!session?.user) redirect("/sign-in");
+  if (!session?.user) redirect(ROUTES.signIn);
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { name: true, email: true, createdAt: true },
   });
-  if (!user) redirect("/sign-in");
+  if (!user) redirect(ROUTES.signIn);
 
   const displayName = user.name ?? user.email.split("@")[0] ?? "Account";
 
   return (
-    <div className="animate-page-in mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-      <h1 className="font-display text-[1.75rem] leading-tight">Settings</h1>
-      <p className="text-muted-foreground mt-1 text-sm">Manage your profile and sign-in details.</p>
+    <div className="animate-page-in container-narrow py-[clamp(1.75rem,3vw,2.5rem)]">
+      <PageHeader title="Settings" description="Manage your profile and sign-in details." />
 
       {/* Identity card */}
       <div className="card mt-7 rounded-xl">

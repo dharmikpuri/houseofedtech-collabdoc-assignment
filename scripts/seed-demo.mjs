@@ -53,7 +53,9 @@ const DOCUMENTS = [
     shareWithTeammate: "EDITOR",
     blocks: [
       h(1, "Q4 Launch Plan"),
-      p("We are launching the offline-first editor to all workspaces on November 18. The goal is zero lost edits during flaky connectivity."),
+      p(
+        "We are launching the offline-first editor to all workspaces on November 18. The goal is zero lost edits during flaky connectivity.",
+      ),
       h(2, "Milestones"),
       ul(
         "Beta to 50 design partners by October 20",
@@ -67,7 +69,9 @@ const DOCUMENTS = [
         [true, "Security review of invite links"],
       ),
       h(2, "Risks"),
-      p("The main risk is large documents on older phones. We cap document size and warn early, and the team agreed to split any document over 1 MB."),
+      p(
+        "The main risk is large documents on older phones. We cap document size and warn early, and the team agreed to split any document over 1 MB.",
+      ),
     ],
   },
   {
@@ -77,7 +81,9 @@ const DOCUMENTS = [
     shareWithTeammate: "VIEWER",
     blocks: [
       h(1, "Offline Sync — Design Notes"),
-      p("Document text is a Yjs CRDT, so concurrent edits merge deterministically without a central lock. REST actions such as saving a version go through a durable outbox in IndexedDB."),
+      p(
+        "Document text is a Yjs CRDT, so concurrent edits merge deterministically without a central lock. REST actions such as saving a version go through a durable outbox in IndexedDB.",
+      ),
       h(2, "Decisions"),
       ul(
         "Sharing and deletion are online-only: replaying permission changes later is surprising",
@@ -96,10 +102,7 @@ const DOCUMENTS = [
       h(1, "Weekly Team Sync"),
       p("Attendees: Demo, Priya, Marcus."),
       h(2, "Updates"),
-      ul(
-        "Search & Ask is live behind the AI flag",
-        "Comment mentions now send notifications",
-      ),
+      ul("Search & Ask is live behind the AI flag", "Comment mentions now send notifications"),
       h(2, "Next week"),
       todo([false, "Review onboarding checklist"], [false, "Plan the retro"]),
     ],
@@ -132,11 +135,16 @@ function toYjsState(blocks) {
           case "heading":
             return element("heading", [text(block.text)], { level: block.level });
           case "bulletList":
-            return element("bulletList", block.items.map((item) => element("listItem", [paragraph(item)])));
+            return element(
+              "bulletList",
+              block.items.map((item) => element("listItem", [paragraph(item)])),
+            );
           case "taskList":
             return element(
               "taskList",
-              block.items.map(([checked, item]) => element("taskItem", [paragraph(item)], { checked })),
+              block.items.map(([checked, item]) =>
+                element("taskItem", [paragraph(item)], { checked }),
+              ),
             );
           default:
             return paragraph(block.text);
@@ -158,13 +166,24 @@ function toTipTapJson(blocks) {
     content: blocks.map((block) => {
       switch (block.type) {
         case "heading":
-          return { type: "heading", attrs: { level: block.level }, content: [{ type: "text", text: block.text }] };
+          return {
+            type: "heading",
+            attrs: { level: block.level },
+            content: [{ type: "text", text: block.text }],
+          };
         case "bulletList":
-          return { type: "bulletList", content: block.items.map((item) => ({ type: "listItem", content: [paragraph(item)] })) };
+          return {
+            type: "bulletList",
+            content: block.items.map((item) => ({ type: "listItem", content: [paragraph(item)] })),
+          };
         case "taskList":
           return {
             type: "taskList",
-            content: block.items.map(([checked, item]) => ({ type: "taskItem", attrs: { checked }, content: [paragraph(item)] })),
+            content: block.items.map(([checked, item]) => ({
+              type: "taskItem",
+              attrs: { checked },
+              content: [paragraph(item)],
+            })),
           };
         default:
           return paragraph(block.text);
@@ -193,7 +212,9 @@ async function main() {
 
   const existing = await prisma.document.count({ where: { ownerId: demo.id, deletedAt: null } });
   if (existing > 0 && !RESET) {
-    console.log(`Demo workspace already exists (${existing} documents). Use --reset to rebuild it.`);
+    console.log(
+      `Demo workspace already exists (${existing} documents). Use --reset to rebuild it.`,
+    );
     return;
   }
   if (RESET) {
@@ -202,7 +223,10 @@ async function main() {
     await prisma.folder.deleteMany({ where: { userId: demo.id } });
   }
 
-  const folder = await prisma.folder.create({ data: { userId: demo.id, name: "Launch" }, select: { id: true } });
+  const folder = await prisma.folder.create({
+    data: { userId: demo.id, name: "Launch" },
+    select: { id: true },
+  });
 
   for (const spec of DOCUMENTS) {
     const document = await prisma.document.create({
@@ -250,7 +274,9 @@ async function main() {
     }
   }
 
-  console.log(`Seeded demo workspace: ${DOCUMENTS.length} documents for ${DEMO_EMAIL} (teammate: ${TEAMMATE_EMAIL}).`);
+  console.log(
+    `Seeded demo workspace: ${DOCUMENTS.length} documents for ${DEMO_EMAIL} (teammate: ${TEAMMATE_EMAIL}).`,
+  );
 }
 
 main()

@@ -8,6 +8,7 @@ import { auth } from "@/auth";
 import { redeemShareLink } from "@/lib/authz/share-links";
 import { clientIp, rateLimit } from "@/lib/security/rate-limit";
 import { shareTokenSchema } from "@/lib/validation/workspace";
+import { ROUTES, documentPath, invitePath, signInPath } from "@/config/routes";
 
 export type AcceptInviteState = { error?: string };
 
@@ -32,13 +33,13 @@ export async function acceptInviteAction(
   }
 
   const session = await auth();
-  if (!session?.user) redirect(`/sign-in?callbackUrl=${encodeURIComponent(`/invite/${token}`)}`);
+  if (!session?.user) redirect(signInPath(invitePath(token)));
 
   if (!shareTokenSchema.safeParse(token).success) return { error: REASONS.invalid };
 
   const result = await redeemShareLink(token, session.user.id);
   if (!result.ok) return { error: REASONS[result.reason] };
 
-  revalidatePath("/dashboard");
-  redirect(`/documents/${result.documentId}`);
+  revalidatePath(ROUTES.dashboard);
+  redirect(documentPath(result.documentId));
 }

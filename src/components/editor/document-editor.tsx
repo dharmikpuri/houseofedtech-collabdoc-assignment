@@ -26,7 +26,7 @@ import { toast } from "react-toastify";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MergeLoader } from "@/components/brand/merge-loader";
 import { AvatarStack, avatarColor } from "@/components/ui/avatar";
 import { Tooltip } from "@/components/ui/tooltip";
 import { SyncDetails } from "@/components/sync/sync-details";
@@ -500,15 +500,10 @@ export function DocumentEditor({
         </span>
 
         <div className="min-h-0 flex-1 overflow-y-auto print:overflow-visible">
-          <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-10 sm:py-14 print:max-w-none print:p-0">
+          <div className="mx-auto w-full max-w-[50rem] px-[clamp(1.25rem,5vw,3rem)] py-[clamp(2rem,5vw,3.5rem)] print:max-w-none print:p-0">
             {!localReady && !editor ? (
-              <div className="space-y-4" aria-busy>
-                <span className="sr-only" role="status">
-                  Loading your local copy…
-                </span>
-                {[94, 86, 90, 62].map((width, index) => (
-                  <Skeleton key={index} className="h-4" style={{ width: `${width}%` }} />
-                ))}
+              <div className="flex justify-center py-[12vh]" aria-busy>
+                <MergeLoader size="sm" label="Loading your local copy…" />
               </div>
             ) : (
               <EditorContent editor={editor} />

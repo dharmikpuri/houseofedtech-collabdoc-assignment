@@ -159,7 +159,11 @@ async function main() {
       `status=${anonDash.status}`,
     );
     const anonApi = await fetch(`${BASE}/api/documents/anything/versions`, { redirect: "manual" });
-    check("versions API returns 401 when anonymous", anonApi.status === 401, `status=${anonApi.status}`);
+    check(
+      "versions API returns 401 when anonymous",
+      anonApi.status === 401,
+      `status=${anonApi.status}`,
+    );
     const anonAi = await fetch(`${BASE}/api/documents/anything/ai/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -173,7 +177,10 @@ async function main() {
     const dashHtml = await dash.text();
     check("GET /dashboard returns 200", dash.status === 200, `status=${dash.status}`);
     check("dashboard greets the signed-in user", dashHtml.includes("Welcome back"));
-    check("dashboard shows the empty state for a new account", dashHtml.includes("Create your first document"));
+    check(
+      "dashboard shows the empty state for a new account",
+      dashHtml.includes("Create your first document"),
+    );
 
     section("Document creation (real server action in the browser)");
     await owner.page.goto(`${BASE}/dashboard`, 2500);
@@ -198,8 +205,15 @@ async function main() {
     section("Editor against real data");
     const docRes = await api(owner, `/documents/${documentId}`);
     const docHtml = await docRes.text();
-    check("GET /documents/:id returns 200 for the owner", docRes.status === 200, `status=${docRes.status}`);
-    check("editor renders a sync state", /Saved locally|Synced|Connecting|Offline|Syncing/.test(docHtml));
+    check(
+      "GET /documents/:id returns 200 for the owner",
+      docRes.status === 200,
+      `status=${docRes.status}`,
+    );
+    check(
+      "editor renders a sync state",
+      /Saved locally|Synced|Connecting|Offline|Syncing/.test(docHtml),
+    );
     check("editor renders the Owner badge", docHtml.includes("Owner"));
 
     section("Collab token — real-time authentication");
@@ -243,7 +257,9 @@ async function main() {
     const versionId = vList.versions?.[0]?.id;
     check("version appears in the list", Boolean(versionId));
     if (versionId) {
-      const vGet = await json(await api(owner, `/api/documents/${documentId}/versions/${versionId}`));
+      const vGet = await json(
+        await api(owner, `/api/documents/${documentId}/versions/${versionId}`),
+      );
       check("version content round-trips intact", deepEqual(vGet.content, content));
     }
 
@@ -253,11 +269,19 @@ async function main() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: viewer.email, role: "VIEWER" }),
     });
-    check("owner can share the document as VIEWER (201)", share.status === 201, `status=${share.status}`);
+    check(
+      "owner can share the document as VIEWER (201)",
+      share.status === 201,
+      `status=${share.status}`,
+    );
 
     const viewerDoc = await api(viewer, `/documents/${documentId}`);
     const viewerHtml = await viewerDoc.text();
-    check("viewer can open the shared document", viewerDoc.status === 200, `status=${viewerDoc.status}`);
+    check(
+      "viewer can open the shared document",
+      viewerDoc.status === 200,
+      `status=${viewerDoc.status}`,
+    );
     check("viewer sees the view-only notice", viewerHtml.includes("View-only access"));
 
     const viewerVersion = await api(viewer, `/api/documents/${documentId}/versions`, {
@@ -265,7 +289,11 @@ async function main() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ label: "viewer attempt", content }),
     });
-    check("viewer CANNOT create a version (403)", viewerVersion.status === 403, `status=${viewerVersion.status}`);
+    check(
+      "viewer CANNOT create a version (403)",
+      viewerVersion.status === 403,
+      `status=${viewerVersion.status}`,
+    );
 
     const viewerToken = await json(
       await api(viewer, "/api/collab-token", {
@@ -276,22 +304,38 @@ async function main() {
     );
     if (viewerToken.token) {
       const p = JSON.parse(Buffer.from(viewerToken.token.split(".")[1], "base64url").toString());
-      check("viewer token carries VIEWER role (collab server enforces read-only)", p.role === "VIEWER", `role=${p.role}`);
+      check(
+        "viewer token carries VIEWER role (collab server enforces read-only)",
+        p.role === "VIEWER",
+        `role=${p.role}`,
+      );
     } else {
       check("viewer receives a collab token", false);
     }
 
     section("Tenant isolation");
     const sDoc = await api(stranger, `/documents/${documentId}`);
-    check("unrelated user gets 404 on the document page", sDoc.status === 404, `status=${sDoc.status}`);
+    check(
+      "unrelated user gets 404 on the document page",
+      sDoc.status === 404,
+      `status=${sDoc.status}`,
+    );
     const sVersions = await api(stranger, `/api/documents/${documentId}/versions`);
-    check("unrelated user gets 404 from versions API", sVersions.status === 404, `status=${sVersions.status}`);
+    check(
+      "unrelated user gets 404 from versions API",
+      sVersions.status === 404,
+      `status=${sVersions.status}`,
+    );
     const sToken = await api(stranger, "/api/collab-token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ documentId }),
     });
-    check("unrelated user cannot obtain a collab token (404)", sToken.status === 404, `status=${sToken.status}`);
+    check(
+      "unrelated user cannot obtain a collab token (404)",
+      sToken.status === 404,
+      `status=${sToken.status}`,
+    );
 
     section("AI read access for a Viewer (checked before the owner's burst)");
     // The rate limiter buckets per IP, and all three actors share localhost, so
@@ -315,7 +359,11 @@ async function main() {
       body: JSON.stringify({ content, task: "summary" }),
     });
     const analyzeBody = await json(analyze);
-    check("AI analyze → summary", analyze.status === 200 && Boolean(analyzeBody.result), `status=${analyze.status} ${analyzeBody.error ?? ""}`);
+    check(
+      "AI analyze → summary",
+      analyze.status === 200 && Boolean(analyzeBody.result),
+      `status=${analyze.status} ${analyzeBody.error ?? ""}`,
+    );
     if (analyzeBody.result) console.log(`        ↳ ${preview(analyzeBody.result)}`);
 
     const items = await api(owner, `/api/documents/${documentId}/ai/analyze`, {
@@ -324,7 +372,11 @@ async function main() {
       body: JSON.stringify({ content, task: "action-items" }),
     });
     const itemsBody = await json(items);
-    check("AI analyze → action items", items.status === 200 && Boolean(itemsBody.result), `status=${items.status}`);
+    check(
+      "AI analyze → action items",
+      items.status === 200 && Boolean(itemsBody.result),
+      `status=${items.status}`,
+    );
     if (itemsBody.result) console.log(`        ↳ ${preview(itemsBody.result)}`);
 
     const insights = await api(owner, `/api/documents/${documentId}/ai/analyze`, {
@@ -337,27 +389,45 @@ async function main() {
     const ask = await api(owner, `/api/documents/${documentId}/ai/ask`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content, question: "Who owns the offline sync queue and when is it due?" }),
+      body: JSON.stringify({
+        content,
+        question: "Who owns the offline sync queue and when is it due?",
+      }),
     });
     const askBody = await json(ask);
-    check("AI ask → grounded answer", ask.status === 200 && Boolean(askBody.answer), `status=${ask.status} ${askBody.error ?? ""}`);
+    check(
+      "AI ask → grounded answer",
+      ask.status === 200 && Boolean(askBody.answer),
+      `status=${ask.status} ${askBody.error ?? ""}`,
+    );
     if (askBody.answer) console.log(`        ↳ ${preview(askBody.answer)}`);
 
     const rewrite = await api(owner, `/api/documents/${documentId}/ai/rewrite`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: "the pooler drops long transactions sometimes", mode: "improve" }),
+      body: JSON.stringify({
+        text: "the pooler drops long transactions sometimes",
+        mode: "improve",
+      }),
     });
     const rewriteBody = await json(rewrite);
-    check("AI rewrite → improved text", rewrite.status === 200 && Boolean(rewriteBody.result), `status=${rewrite.status} ${rewriteBody.error ?? ""}`);
+    check(
+      "AI rewrite → improved text",
+      rewrite.status === 200 && Boolean(rewriteBody.result),
+      `status=${rewrite.status} ${rewriteBody.error ?? ""}`,
+    );
     if (rewriteBody.result) console.log(`        ↳ ${preview(rewriteBody.result)}`);
 
     if (versionId) {
-      const changed = await api(owner, `/api/documents/${documentId}/versions/${versionId}/summary`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentContent: content }),
-      });
+      const changed = await api(
+        owner,
+        `/api/documents/${documentId}/versions/${versionId}/summary`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentContent: content }),
+        },
+      );
       check("AI version-diff summary responds", changed.status === 200, `status=${changed.status}`);
     }
 
@@ -367,14 +437,22 @@ async function main() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: "viewer must not be able to rewrite", mode: "improve" }),
     });
-    check("viewer CANNOT call /ai/rewrite (403)", viewerRewrite.status === 403, `status=${viewerRewrite.status}`);
+    check(
+      "viewer CANNOT call /ai/rewrite (403)",
+      viewerRewrite.status === 403,
+      `status=${viewerRewrite.status}`,
+    );
 
     const strangerAi = await api(stranger, `/api/documents/${documentId}/ai/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content, task: "summary" }),
     });
-    check("unrelated user gets 404 from AI endpoints", strangerAi.status === 404, `status=${strangerAi.status}`);
+    check(
+      "unrelated user gets 404 from AI endpoints",
+      strangerAi.status === 404,
+      `status=${strangerAi.status}`,
+    );
 
     section("Payload caps (OOM protection)");
     const huge = {
@@ -393,7 +471,11 @@ async function main() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ label: "too big", content: huge }),
     });
-    check("oversized version payload rejected (413)", bigVersion.status === 413, `status=${bigVersion.status}`);
+    check(
+      "oversized version payload rejected (413)",
+      bigVersion.status === 413,
+      `status=${bigVersion.status}`,
+    );
 
     section("Input validation");
     const badTask = await api(owner, `/api/documents/${documentId}/ai/analyze`, {
@@ -408,14 +490,22 @@ async function main() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content, question: "   " }),
     });
-    check("blank AI question rejected (400)", blankQuestion.status === 400, `status=${blankQuestion.status}`);
+    check(
+      "blank AI question rejected (400)",
+      blankQuestion.status === 400,
+      `status=${blankQuestion.status}`,
+    );
 
     const badMode = await api(owner, `/api/documents/${documentId}/ai/rewrite`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: "hello", mode: "destroy" }),
     });
-    check("invalid rewrite mode rejected (400)", badMode.status === 400, `status=${badMode.status}`);
+    check(
+      "invalid rewrite mode rejected (400)",
+      badMode.status === 400,
+      `status=${badMode.status}`,
+    );
 
     section("Sharing authorization and revocation");
     const viewerShares = await api(viewer, `/api/documents/${documentId}/permissions`, {
@@ -423,7 +513,11 @@ async function main() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: stranger.email, role: "EDITOR" }),
     });
-    check("viewer CANNOT share the document (403)", viewerShares.status === 403, `status=${viewerShares.status}`);
+    check(
+      "viewer CANNOT share the document (403)",
+      viewerShares.status === 403,
+      `status=${viewerShares.status}`,
+    );
 
     const revoke = await api(owner, `/api/documents/${documentId}/permissions/${viewer.userId}`, {
       method: "DELETE",
@@ -431,7 +525,11 @@ async function main() {
     check("owner can revoke the viewer's access", revoke.status === 200, `status=${revoke.status}`);
 
     const afterRevoke = await api(viewer, `/documents/${documentId}`);
-    check("revoked user immediately loses access (404)", afterRevoke.status === 404, `status=${afterRevoke.status}`);
+    check(
+      "revoked user immediately loses access (404)",
+      afterRevoke.status === 404,
+      `status=${afterRevoke.status}`,
+    );
 
     finish(browser, { documentId });
   } catch (error) {

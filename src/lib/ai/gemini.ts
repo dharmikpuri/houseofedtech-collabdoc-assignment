@@ -6,6 +6,7 @@ import {
   type AiProvider,
   type EmbeddingTask,
 } from "@/lib/ai/provider";
+import { log } from "@/lib/observability/logger";
 
 const DEFAULT_MODEL = "gemini-2.5-flash";
 const DEFAULT_EMBEDDING_MODEL = "gemini-embedding-001";
@@ -13,9 +14,19 @@ const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 /** Gemini's batch embedding endpoint accepts at most this many inputs. */
 const EMBED_BATCH = 100;
 
+/**
+ * API keys in priority order. The first is always tried first; the optional
+ * second (another free-tier key) only absorbs requests the first can't serve.
+ */
+function apiKeys(): string[] {
+  return [process.env.GEMINI_API_KEY, process.env.GEMINI_API_KEY_2].filter((key): key is string =>
+    Boolean(key),
+  );
+}
+
 /** Whether AI features should be offered at all. */
 export function isAiEnabled(): boolean {
-  return Boolean(process.env.GEMINI_API_KEY);
+  return apiKeys().length > 0;
 }
 
 function aiModelName(): string {
@@ -24,12 +35,6 @@ function aiModelName(): string {
 
 function embeddingModelName(): string {
   return process.env.GEMINI_EMBEDDING_MODEL ?? DEFAULT_EMBEDDING_MODEL;
-}
-
-function apiKey(): string {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new AiError("GEMINI_API_KEY is not set", "not_configured");
-  return key;
 }
 
 /** Maps a transport failure onto the provider-neutral error kinds. */
@@ -45,6 +50,47 @@ function statusError(response: Response): AiError {
   // The upstream body can echo the API key in error paths, so it is
   // deliberately not read or logged here.
   return new AiError(`Gemini request failed (${response.status})`, "upstream", response.status);
+}
+
+/**
+ * Any failure of the key itself or the service is worth another key: quota
+ * (429), an invalid or revoked key (Gemini answers 400/403 for those),
+ * Google-side trouble (5xx) and network errors. A cancelled request is not.
+ */
+function worthAnotherKey(error: AiError): boolean {
+  return error.kind === "rate_limited" || error.kind === "upstream";
+}
+
+/**
+ * Sends one request, falling back to the next key when the current one can't
+ * serve it. Callers never see the fallback; only the last key's error surfaces.
+ */
+async function withKeyFallback(
+  send: (key: string) => Promise<Response>,
+  isUsable: (response: Response) => boolean = (response) => response.ok,
+): Promise<Response> {
+  const keys = apiKeys();
+  if (keys.length === 0) throw new AiError("GEMINI_API_KEY is not set", "not_configured");
+
+  let lastError: AiError | undefined;
+  for (const [index, key] of keys.entries()) {
+    try {
+      const response = await send(key);
+      if (isUsable(response)) return response;
+      lastError = statusError(response);
+      // Release the unread error body so its connection isn't held open.
+      void response.body?.cancel().catch(() => {});
+    } catch (error) {
+      lastError = transportError(error);
+    }
+    if (!worthAnotherKey(lastError) || index === keys.length - 1) break;
+    log.warn("Gemini key failed, trying the next one", {
+      slot: index + 1,
+      reason: lastError.kind,
+      status: lastError.status,
+    });
+  }
+  throw lastError;
 }
 
 type GeminiResponse = { candidates?: { content?: { parts?: { text?: string }[] } }[] };
@@ -85,20 +131,15 @@ class GeminiProvider implements AiProvider {
   }
 
   async complete(messages: AiMessage[], options: AiCompletionOptions = {}): Promise<string> {
-    const key = apiKey();
-
-    let response: Response;
-    try {
-      response = await fetch(`${ENDPOINT}/${this.model}:generateContent?key=${key}`, {
+    const body = this.body(messages, options);
+    const response = await withKeyFallback((key) =>
+      fetch(`${ENDPOINT}/${this.model}:generateContent?key=${key}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: options.signal,
-        body: this.body(messages, options),
-      });
-    } catch (error) {
-      throw transportError(error);
-    }
-    if (!response.ok) throw statusError(response);
+        body,
+      }),
+    );
 
     const text = textOf((await response.json()) as GeminiResponse).trim();
     if (!text) throw new AiError("Gemini returned no content", "empty_response");
@@ -106,20 +147,21 @@ class GeminiProvider implements AiProvider {
   }
 
   async *stream(messages: AiMessage[], options: AiCompletionOptions = {}): AsyncGenerator<string> {
-    const key = apiKey();
+    // The fallback happens before the first token; once a stream has started
+    // it stays on its key.
+    const body = this.body(messages, options);
+    const response = await withKeyFallback(
+      (key) =>
+        fetch(`${ENDPOINT}/${this.model}:streamGenerateContent?alt=sse&key=${key}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: options.signal,
+          body,
+        }),
+      (candidate) => candidate.ok && candidate.body !== null,
+    );
 
-    let response: Response;
-    try {
-      response = await fetch(`${ENDPOINT}/${this.model}:streamGenerateContent?alt=sse&key=${key}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: options.signal,
-        body: this.body(messages, options),
-      });
-    } catch (error) {
-      throw transportError(error);
-    }
-    if (!response.ok || !response.body) throw statusError(response);
+    if (!response.body) throw new AiError("Gemini returned no content", "empty_response");
 
     // Server-sent events: one `data: {json}` line per chunk.
     const reader = response.body.getReader();
@@ -161,31 +203,29 @@ class GeminiProvider implements AiProvider {
   }
 
   async embed(texts: string[], task: EmbeddingTask, signal?: AbortSignal): Promise<number[][]> {
-    const key = apiKey();
+    // Every key uses the same embedding model, so vectors from either key
+    // live in the same space and can be searched together.
     const model = embeddingModelName();
     const vectors: number[][] = [];
 
     for (let start = 0; start < texts.length; start += EMBED_BATCH) {
       const batch = texts.slice(start, start + EMBED_BATCH);
-      let response: Response;
-      try {
-        response = await fetch(`${ENDPOINT}/${model}:batchEmbedContents?key=${key}`, {
+      const body = JSON.stringify({
+        requests: batch.map((text) => ({
+          model: `models/${model}`,
+          content: { parts: [{ text }] },
+          taskType: task === "query" ? "RETRIEVAL_QUERY" : "RETRIEVAL_DOCUMENT",
+          outputDimensionality: EMBEDDING_DIMENSIONS,
+        })),
+      });
+      const response = await withKeyFallback((key) =>
+        fetch(`${ENDPOINT}/${model}:batchEmbedContents?key=${key}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           signal,
-          body: JSON.stringify({
-            requests: batch.map((text) => ({
-              model: `models/${model}`,
-              content: { parts: [{ text }] },
-              taskType: task === "query" ? "RETRIEVAL_QUERY" : "RETRIEVAL_DOCUMENT",
-              outputDimensionality: EMBEDDING_DIMENSIONS,
-            })),
-          }),
-        });
-      } catch (error) {
-        throw transportError(error);
-      }
-      if (!response.ok) throw statusError(response);
+          body,
+        }),
+      );
 
       const data = (await response.json()) as { embeddings?: { values?: number[] }[] };
       const values = (data.embeddings ?? []).map((embedding) => embedding.values ?? []);

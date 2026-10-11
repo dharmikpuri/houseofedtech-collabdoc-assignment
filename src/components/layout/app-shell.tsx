@@ -3,18 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  CloudUpload,
-  FileText,
-  FlaskConical,
-  Menu,
-  MessageSquareText,
-  PanelLeftClose,
-  Search,
-  Settings,
-  WifiOff,
-  X,
-} from "lucide-react";
+import { CloudUpload, Menu, PanelLeftClose, Search, WifiOff, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,23 +20,8 @@ import { useNetworkStatus } from "@/lib/sync/use-network-status";
 import { useOutbox } from "@/lib/outbox/use-outbox";
 import { Logo } from "@/components/brand/logo";
 import { CreateDocumentButton } from "@/components/documents/create-document-button";
-
-const NAV_SECTIONS = [
-  {
-    label: "Workspace",
-    items: [
-      { href: "/dashboard", label: "Documents", icon: FileText },
-      { href: "/search", label: "Search & Ask", icon: MessageSquareText },
-    ],
-  },
-  {
-    label: "More",
-    items: [
-      { href: "/lab", label: "Sync lab", icon: FlaskConical },
-      { href: "/settings", label: "Settings", icon: Settings },
-    ],
-  },
-] as const;
+import { ROUTES } from "@/config/routes";
+import { APP_NAV } from "@/config/navigation";
 
 /**
  * Authenticated application shell: persistent sidebar on desktop, off-canvas
@@ -129,7 +103,7 @@ export function AppShell({
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="border-border bg-background/90 sticky top-0 z-30 border-b backdrop-blur-md print:hidden">
-            <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
+            <div className="flex h-14 items-center gap-3 px-[clamp(1rem,3vw,2.5rem)]">
               <Button
                 variant="ghost"
                 size="icon"
@@ -270,7 +244,7 @@ function Sidebar({
           collapsed && "lg:justify-center lg:px-0",
         )}
       >
-        <Logo href="/dashboard" showWordmark={!collapsed} className="rounded-md px-1 py-1" />
+        <Logo href={ROUTES.dashboard} showWordmark={!collapsed} className="rounded-md px-1 py-1" />
 
         <div className={cn("flex-1", collapsed && "lg:hidden")} />
 
@@ -297,7 +271,7 @@ function Sidebar({
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3">
-        {NAV_SECTIONS.map((section) => (
+        {APP_NAV.map((section) => (
           <div key={section.label} className="mb-5">
             {!collapsed && (
               <p className="text-muted-foreground/80 mb-1.5 px-2.5 text-[10.5px] font-semibold tracking-[0.08em] uppercase">

@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { signInAction, signUpAction, type AuthActionState } from "./actions";
+import { ROUTES } from "@/config/routes";
+import { SITE } from "@/config/site";
 
 type Mode = "sign-in" | "sign-up";
 
@@ -121,7 +123,7 @@ export function AuthForm({
           <Label htmlFor="password">Password</Label>
           {showForgotPassword && (
             <Link
-              href="/forgot-password"
+              href={ROUTES.forgotPassword}
               className="text-muted-foreground hover:text-foreground mb-1.5 text-xs transition-colors hover:underline"
             >
               Forgot password?
@@ -178,7 +180,7 @@ export function AuthForm({
           <>
             Already have an account?{" "}
             <Link
-              href={`/sign-in${carry}`}
+              href={`${ROUTES.signIn}${carry}`}
               className="text-foreground font-medium underline-offset-4 hover:underline"
             >
               Sign in
@@ -186,9 +188,9 @@ export function AuthForm({
           </>
         ) : (
           <>
-            New to CollabDoc?{" "}
+            New to {SITE.name}?{" "}
             <Link
-              href={`/sign-up${carry}`}
+              href={`${ROUTES.signUp}${carry}`}
               className="text-foreground font-medium underline-offset-4 hover:underline"
             >
               Create an account

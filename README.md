@@ -110,7 +110,8 @@ More (mobile, dark mode, every landing section): [`docs/screenshots/`](docs/scre
   permission join is in the SQL itself, with RLS as the backstop
 
 Every AI surface degrades gracefully without an API key — it explains what to configure rather than
-disappearing.
+disappearing. An optional second key (`GEMINI_API_KEY_2`) takes over silently whenever the first is
+rate limited or unavailable; users only see an error if both fail.
 
 **Workspace**
 
@@ -120,17 +121,17 @@ disappearing.
 
 ## Tech stack
 
-| Layer               | Choice                                                       |
-| ------------------- | ------------------------------------------------------------ |
-| Framework           | Next.js 16 (App Router, React 19, TypeScript)                |
-| Styling             | Tailwind CSS v4 with design tokens; Manrope + Inter          |
-| Database            | PostgreSQL (Supabase) + Prisma 6, pgvector                   |
-| Auth                | Auth.js v5 (Credentials, JWT sessions)                       |
-| Editor              | TipTap 3 (ProseMirror)                                       |
-| Conflict resolution | Yjs (CRDT) + `y-indexeddb` for local persistence             |
-| Real-time transport | Hocuspocus (Yjs WebSocket server) — a separate Node process  |
-| AI                  | Google Gemini (REST), behind a swappable provider interface  |
-| UI                  | Radix primitives, lucide icons, hand-built SVG illustrations |
+| Layer               | Choice                                                                                  |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| Framework           | Next.js 16 (App Router, React 19, TypeScript)                                           |
+| Styling             | Tailwind CSS v4 with design tokens; Manrope + Inter                                     |
+| Database            | PostgreSQL (Supabase) + Prisma 6, pgvector                                              |
+| Auth                | Auth.js v5 (Credentials, JWT sessions)                                                  |
+| Editor              | TipTap 3 (ProseMirror)                                                                  |
+| Conflict resolution | Yjs (CRDT) + `y-indexeddb` for local persistence                                        |
+| Real-time transport | Hocuspocus (Yjs WebSocket server) — a separate Node process                             |
+| AI                  | Google Gemini (REST), behind a swappable provider interface                             |
+| UI                  | Radix primitives, lucide icons, a custom filled glyph set, coded SVG flow illustrations |
 
 ## Architecture
 
@@ -197,9 +198,11 @@ cp .env.example .env      # then fill in the values — each one is explained in
 | `NEXT_PUBLIC_APP_URL`               |   yes    | `http://localhost:3000` locally, the public URL in production                 |
 | `NEXT_PUBLIC_COLLAB_WS_URL`         |   yes    | `ws://localhost:1234` locally, the collab server's `wss://` URL in production |
 | `GEMINI_API_KEY`                    |    no    | Enables the AI features                                                       |
+| `GEMINI_API_KEY_2`                  |    no    | Backup key, used only when the first is rate limited or unavailable           |
 | `UPSTASH_REDIS_REST_URL` / `_TOKEN` |    no    | Shares rate limits across instances (in-memory otherwise)                     |
 | `SENTRY_DSN`                        |    no    | Error reporting                                                               |
 | `RESEND_API_KEY` / `EMAIL_FROM`     |    no    | Password-reset emails; "Forgot password" appears only when set                |
+| `CRON_SECRET`                       |    no    | Protects the daily keep-alive cron (production on Vercel)                     |
 
 Generate each secret with:
 
@@ -266,7 +269,8 @@ npm run test:api   # API, authorization rules and AI endpoints
   not see the edit) and back (it must arrive), the dashboard, search, settings and sign-out.
 - **`test:api`** covers authentication, the role matrix (owner / editor / viewer / stranger),
   version save and restore, payload limits and the AI endpoints. The AI checks need
-  `GEMINI_API_KEY`; on a free-tier key, rapid calls can hit the rate limit (HTTP 429).
+  `GEMINI_API_KEY`; on a free-tier key, rapid calls can hit the rate limit (HTTP 429), which a
+  `GEMINI_API_KEY_2` backup absorbs.
 
 Both create throwaway `@example.com` accounts. Set `VERIFY_BASE_URL` to test another origin.
 
@@ -340,6 +344,26 @@ health check):
 Use the direct/session connection string for `DATABASE_URL` and `DIRECT_URL` (see the connection
 note above). Migrations include the RLS policies and enable `pgvector`.
 
+### Keeping a free Supabase project awake
+
+Supabase pauses a free project after a week without database activity. Two independent writers
+keep it active, each upserting its own row in the `heartbeats` table (a real write, not just a
+connection):
+
+| Writer                      | When                 | Setup                                                                     |
+| --------------------------- | -------------------- | ------------------------------------------------------------------------- |
+| Vercel Cron (`vercel.json`) | daily at 06:00 UTC   | Set `CRON_SECRET` in Vercel; Vercel sends it as `Authorization: Bearer …` |
+| Collab server               | on start, every 12 h | None — it uses its existing database connection                           |
+
+`GET /api/cron/heartbeat` answers 401 without the right secret and 503 when `CRON_SECRET` isn't
+set, so it is never public. Vercel only runs crons on production deployments. The table has RLS
+on with no policy, so only the owner connection can touch it.
+
+To check it's working, open the `heartbeats` table in the Supabase table editor: each row's
+`beat_at` should be under a day old. Optionally, a free external scheduler such as
+[cron-job.org](https://cron-job.org) can call the same URL with the same `Authorization` header as
+a third writer.
+
 ### CI/CD
 
 `.github/workflows/ci.yml` runs on every push and pull request:
@@ -363,7 +387,14 @@ note above). Migrations include the RLS policies and enable `pgvector`.
 collabdoc/
 ├─ src/
 │  ├─ app/              # routes: landing, auth, dashboard, document, search, lab, REST API
-│  ├─ components/       # editor, documents, layout, marketing, brand, ui
+│  ├─ config/           # single source of truth: routes, navigation, site identity, personas
+│  ├─ content/          # page copy (landing) — edit words here, not in components
+│  ├─ components/
+│  │  ├─ ui/            # primitives: Button, Input, PageHeader, IconTile, Dialog, …
+│  │  ├─ brand/         # logo, filled glyph icon set, merge loader
+│  │  ├─ marketing/     # landing sections/, illustrations art/, Section + SectionHeader
+│  │  ├─ documents/     # dashboard list (split into list/), sharing, tags
+│  │  └─ editor/ …      # editor, comments, versions, AI panels
 │  ├─ lib/
 │  │  ├─ authz/         # capability matrix + document/version/sharing access (RLS-scoped)
 │  │  ├─ ai/            # provider interface, Gemini adapter, prompts, extraction
@@ -379,6 +410,21 @@ collabdoc/
 ├─ docs/screenshots/    # product screenshots
 └─ public/              # service worker, icons, manifest
 ```
+
+### Where to change things
+
+Every value that appears in more than one place is defined once:
+
+| To change…                                        | Edit                                                                       |
+| ------------------------------------------------- | -------------------------------------------------------------------------- |
+| Colours, radius, shadows, fonts                   | tokens at the top of `src/app/globals.css` (light and `.dark`)             |
+| Heading sizes, page widths, section spacing       | utilities in `src/app/globals.css` (`page-title`, `container-page`, …)     |
+| Button styles and sizes                           | `src/components/ui/button.tsx` (variants)                                  |
+| A route path                                      | `src/config/routes.ts` — links, redirects and the auth guard all import it |
+| Header, footer or sidebar links                   | `src/config/navigation.ts`                                                 |
+| Product name, descriptions, author, brand colours | `src/config/site.ts`                                                       |
+| Landing page wording                              | `src/content/landing.ts`                                                   |
+| Icons on marketing pages                          | `src/components/brand/glyphs.tsx`                                          |
 
 ## Scripts
 

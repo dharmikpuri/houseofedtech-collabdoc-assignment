@@ -6,6 +6,7 @@ import { RefreshCw, TriangleAlert } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ROUTES } from "@/config/routes";
 
 /**
  * Route-level error boundary.
@@ -62,7 +63,7 @@ export default function GlobalError({
               Try again
             </Button>
             <Button asChild variant="secondary">
-              <Link href="/dashboard">Go to documents</Link>
+              <Link href={ROUTES.dashboard}>Go to documents</Link>
             </Button>
           </>
         }

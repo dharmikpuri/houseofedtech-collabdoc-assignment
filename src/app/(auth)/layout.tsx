@@ -1,7 +1,8 @@
 import { Logo } from "@/components/brand/logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { AUTHOR, AuthorLinks } from "@/components/layout/site-footer";
+import { AuthorLinks } from "@/components/layout/site-footer";
 import { AuthShowcase } from "@/components/marketing/auth-showcase";
+import { AUTHOR } from "@/config/site";
 
 /**
  * Split-screen auth layout: the form on the left, an inset brand panel on the

@@ -313,3 +313,15 @@ model DocumentTag {
   @@index([tag])
   @@map("document_tags")
 }
+
+// Keep-alive marker. A free Supabase project pauses after a week without
+// database activity, so the daily cron route and the collab server each
+// upsert their own row here — a real write, which a bare connection is not.
+// RLS is on with no policy: only the owner connection touches it.
+model Heartbeat {
+  source String   @id
+  beatAt DateTime @default(now()) @map("beat_at")
+  beats  Int      @default(1)
+
+  @@map("heartbeats")
+}

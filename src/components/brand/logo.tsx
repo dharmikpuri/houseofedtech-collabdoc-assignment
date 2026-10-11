@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import { ROUTES } from "@/config/routes";
+import { BRAND_COLORS, SITE } from "@/config/site";
 
 /**
  * The CollabDoc mark: two edit streams curving into one line — the merge the
@@ -17,7 +19,7 @@ export function LogoMark({ className, title }: { className?: string; title?: str
       aria-hidden={title ? undefined : true}
       aria-label={title}
     >
-      <rect width="32" height="32" rx="9" fill="#4f5ff5" />
+      <rect width="32" height="32" rx="9" fill={BRAND_COLORS.primary} />
       <g fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
         {/* Lower stream, set back */}
         <path d="M8 22h3.2c4.4 0 4.6-6 9-6" opacity="0.55" />
@@ -32,7 +34,7 @@ export function LogoMark({ className, title }: { className?: string; title?: str
 export function Logo({
   className,
   markClassName,
-  href = "/",
+  href = ROUTES.home,
   showWordmark = true,
 }: {
   className?: string;
@@ -43,7 +45,7 @@ export function Logo({
   const content = (
     <>
       <LogoMark className={markClassName} />
-      {showWordmark && <span className="font-display text-[18px]">CollabDoc</span>}
+      {showWordmark && <span className="font-display text-[18px]">{SITE.name}</span>}
     </>
   );
 
@@ -52,7 +54,7 @@ export function Logo({
   if (href === null) return <span className={classes}>{content}</span>;
 
   return (
-    <Link href={href} className={classes} aria-label="CollabDoc home">
+    <Link href={href} className={classes} aria-label={`${SITE.name} home`}>
       {content}
     </Link>
   );

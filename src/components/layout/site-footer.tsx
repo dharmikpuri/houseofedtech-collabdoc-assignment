@@ -2,20 +2,17 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/logo";
+import { FOOTER_NAV, type NavLink } from "@/config/navigation";
+import { AUTHOR, SITE } from "@/config/site";
 
-/**
- * Global footer with the author's name, GitHub, and LinkedIn.
+/*
+ * Global footer with the author's name, GitHub, and LinkedIn. Its link columns
+ * come from FOOTER_NAV in the navigation config.
  *
  * The brand marks are inline SVG rather than icon-library components: lucide
  * dropped brand icons in v1, and substituting a generic glyph for a recognised
  * logo reads as a mistake.
  */
-export const AUTHOR = {
-  name: "Dharmik Puri Goswami",
-  github: "https://github.com/dharmikpuri",
-  linkedin: "https://www.linkedin.com/in/dharmikpurigoswami/",
-};
-
 function GithubMark(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
@@ -57,24 +54,11 @@ export function AuthorLinks({ className }: { className?: string }) {
   );
 }
 
-const PRODUCT_LINKS = [
-  { href: "/#features", label: "Features" },
-  { href: "/#how-it-works", label: "How sync works" },
-  { href: "/#security", label: "Security" },
-  { href: "/lab", label: "Sync lab" },
-];
-
-const ACCOUNT_LINKS = [
-  { href: "/sign-up", label: "Create account" },
-  { href: "/sign-in", label: "Sign in" },
-  { href: "/dashboard", label: "Open the app" },
-];
-
 export function SiteFooter({ variant = "full" }: { variant?: "full" | "compact" }) {
   if (variant === "compact") {
     return (
       <footer className="border-border border-t">
-        <div className="text-muted-foreground mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-5 text-sm sm:flex-row sm:px-6">
+        <div className="text-muted-foreground container-page flex flex-col items-center justify-between gap-3 py-5 text-sm sm:flex-row">
           <p>
             Designed &amp; built by{" "}
             <span className="text-foreground font-medium">{AUTHOR.name}</span>
@@ -86,38 +70,39 @@ export function SiteFooter({ variant = "full" }: { variant?: "full" | "compact" 
   }
 
   return (
-    <footer className="border-border bg-surface/40 border-t">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
-        <div className="max-w-xs">
+    <footer className="border-border border-t">
+      <div className="container-page grid gap-[clamp(2.5rem,4vw,3rem)] py-[clamp(3rem,6vw,4rem)] sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+        <div className="max-w-sm">
           <Logo />
-          <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
+          <p className="text-muted-foreground mt-5 text-[15px] leading-relaxed">
             A local-first collaborative workspace. Your documents live on your device first and
             merge with everyone else&apos;s the moment you&apos;re back online.
           </p>
-          <div className="mt-5 flex items-center gap-2">
+          <div className="mt-6 flex items-center gap-1">
             {AUTHOR_LINKS.map(({ href, label, Mark }) => (
               <a
                 key={label}
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border-border bg-surface text-muted-foreground hover:text-foreground hover:border-border-strong inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium shadow-xs transition-colors"
+                aria-label={`${AUTHOR.name} on ${label}`}
+                className="text-primary hover:bg-primary-subtle flex size-9 items-center justify-center rounded-lg transition-colors"
               >
-                <Mark className="size-3.5" />
-                {label}
+                <Mark className="size-[18px]" />
               </a>
             ))}
           </div>
         </div>
 
-        <FooterColumn title="Product" links={PRODUCT_LINKS} />
-        <FooterColumn title="Account" links={ACCOUNT_LINKS} />
+        {FOOTER_NAV.map((column) => (
+          <FooterColumn key={column.title} title={column.title} links={column.links} />
+        ))}
       </div>
 
       <div className="border-border border-t">
-        <div className="text-muted-foreground mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs sm:flex-row sm:px-6">
+        <div className="text-muted-foreground container-page py-6 text-center text-sm sm:text-left">
           <p>
-            Designed &amp; built by{" "}
+            © {new Date().getFullYear()} {SITE.name} · Designed &amp; built by{" "}
             <a
               href={AUTHOR.linkedin}
               target="_blank"
@@ -127,29 +112,22 @@ export function SiteFooter({ variant = "full" }: { variant?: "full" | "compact" 
               {AUTHOR.name}
             </a>
           </p>
-          <p className="font-mono tracking-tight">Next.js · Yjs · Hocuspocus · Postgres · Gemini</p>
         </div>
       </div>
     </footer>
   );
 }
 
-function FooterColumn({
-  title,
-  links,
-}: {
-  title: string;
-  links: { href: string; label: string }[];
-}) {
+function FooterColumn({ title, links }: { title: string; links: NavLink[] }) {
   return (
     <div>
-      <h2 className="text-foreground text-xs font-semibold tracking-wide uppercase">{title}</h2>
-      <ul className="mt-4 space-y-2.5">
+      <h2 className="text-foreground font-semibold">{title}</h2>
+      <ul className="mt-5 space-y-3">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+              className="text-muted-foreground hover:text-primary text-[15px] transition-colors"
             >
               {link.label}
             </Link>

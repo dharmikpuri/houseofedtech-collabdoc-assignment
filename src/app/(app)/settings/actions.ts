@@ -9,6 +9,7 @@ import { auth, updateSession } from "@/auth";
 import { prisma } from "@/lib/db";
 import { clientIp, rateLimit } from "@/lib/security/rate-limit";
 import { changePasswordSchema, profileSchema } from "@/lib/validation/auth";
+import { ROUTES } from "@/config/routes";
 
 export type SettingsState = { error?: string; success?: string };
 
@@ -22,7 +23,7 @@ export async function updateProfileAction(
   formData: FormData,
 ): Promise<SettingsState> {
   const session = await auth();
-  if (!session?.user) redirect("/sign-in");
+  if (!session?.user) redirect(ROUTES.signIn);
 
   const parsed = profileSchema.safeParse({ name: formData.get("name") });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid name" };
@@ -39,7 +40,7 @@ export async function changePasswordAction(
   formData: FormData,
 ): Promise<SettingsState> {
   const session = await auth();
-  if (!session?.user) redirect("/sign-in");
+  if (!session?.user) redirect(ROUTES.signIn);
 
   // Throttle by user and IP: current-password checks are a guessing oracle.
   const ip = clientIp(await headers());

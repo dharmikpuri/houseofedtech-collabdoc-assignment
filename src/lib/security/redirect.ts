@@ -1,3 +1,5 @@
+import { AUTH_PAGES, ROUTES } from "@/config/routes";
+
 /**
  * Turns an untrusted `callbackUrl` into a same-site path.
  *
@@ -6,7 +8,7 @@
  * used for an open redirect after sign-in. Anything unusable falls back to
  * the dashboard.
  */
-export function safeRedirectPath(value: unknown, fallback = "/dashboard"): string {
+export function safeRedirectPath(value: unknown, fallback: string = ROUTES.dashboard): string {
   if (typeof value !== "string" || value.length === 0 || value.length > 2_048) return fallback;
 
   let url: URL;
@@ -23,6 +25,6 @@ export function safeRedirectPath(value: unknown, fallback = "/dashboard"): strin
   // a different host.
   if (!path.startsWith("/") || path.startsWith("//") || path.includes("\\")) return fallback;
   // Never bounce back into the auth pages themselves.
-  if (path.startsWith("/sign-in") || path.startsWith("/sign-up")) return fallback;
+  if (AUTH_PAGES.some((page) => path.startsWith(page))) return fallback;
   return path;
 }

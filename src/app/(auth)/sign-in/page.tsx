@@ -31,7 +31,7 @@ export default async function SignInPage({
 
   return (
     <div>
-      <h1 className="font-display text-[1.75rem] leading-tight">Welcome back</h1>
+      <h1 className="page-title">Welcome back</h1>
       <p className="text-muted-foreground mt-1.5 mb-8 text-sm">
         Sign in to pick up where you left off — online or not.
       </p>

@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Logo } from "@/components/brand/logo";
 import { JoinButton } from "./join-button";
+import { ROUTES, documentPath, invitePath, signInPath } from "@/config/routes";
 
 export const metadata: Metadata = { title: "Invitation", robots: { index: false } };
 
@@ -26,7 +27,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
 
   const session = await auth();
   if (!session?.user) {
-    redirect(`/sign-in?callbackUrl=${encodeURIComponent(`/invite/${token}`)}`);
+    redirect(signInPath(invitePath(token)));
   }
 
   const preview = shareTokenSchema.safeParse(token).success
@@ -58,7 +59,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
               description="Ask the document owner to send you a new link."
               action={
                 <Button asChild variant="secondary">
-                  <Link href="/dashboard">Go to your documents</Link>
+                  <Link href={ROUTES.dashboard}>Go to your documents</Link>
                 </Button>
               }
             />
@@ -81,7 +82,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
                     You already have {ROLE_COPY[preview.currentRole]} access to this document.
                   </p>
                   <Button asChild className="mt-5 w-full">
-                    <Link href={`/documents/${preview.documentId}`}>Open document</Link>
+                    <Link href={documentPath(preview.documentId)}>Open document</Link>
                   </Button>
                 </>
               ) : (

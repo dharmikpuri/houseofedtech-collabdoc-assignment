@@ -18,6 +18,7 @@ import { DocumentEditor } from "@/components/editor/document-editor";
 import { TagEditor } from "@/components/documents/tag-editor";
 import { listTags } from "@/lib/authz/tags";
 import { DocumentSkeleton } from "./document-skeleton";
+import { ROUTES } from "@/config/routes";
 
 export const metadata: Metadata = { title: "Document" };
 
@@ -88,12 +89,12 @@ async function DocumentWorkspace({
     // Fills the viewport below the 3.5rem app header so the editor body owns
     // its own scroll rather than the page scrolling as a whole.
     <div className="animate-page-in flex h-[calc(100dvh-3.5rem)] flex-col print:block print:h-auto">
-      <header className="border-border bg-surface/60 shrink-0 border-b px-4 py-3 sm:px-6 print:border-0 print:bg-transparent print:px-0">
+      <header className="border-border bg-surface/60 shrink-0 border-b px-[clamp(1rem,3vw,2.5rem)] py-3 print:border-0 print:bg-transparent print:px-0">
         <nav aria-label="Breadcrumb" className="print:hidden">
           <ol className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <li>
               <Link
-                href="/dashboard"
+                href={ROUTES.dashboard}
                 className="hover:text-foreground inline-flex items-center gap-1.5 transition-colors"
               >
                 <ArrowLeft className="size-3.5" aria-hidden />

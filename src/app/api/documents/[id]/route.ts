@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { renameDocument } from "@/lib/authz/documents";
 import { checkBodySize, checkRateLimit } from "@/lib/security/guard";
 import { renameDocumentSchema } from "@/lib/validation/document";
+import { ROUTES } from "@/config/routes";
 
 /**
  * Rename a document.
@@ -44,6 +45,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   // Keep the dashboard's server-rendered list in step with the new title.
-  revalidatePath("/dashboard");
+  revalidatePath(ROUTES.dashboard);
   return NextResponse.json({ ok: true, title: parsed.data.title });
 }

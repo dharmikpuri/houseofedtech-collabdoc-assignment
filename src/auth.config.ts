@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import { AUTH_PAGES, PROTECTED_PREFIXES, ROUTES } from "@/config/routes";
 
 /**
  * Edge-safe Auth.js config. This half contains NO database or Node-only code,
@@ -7,15 +8,14 @@ import type { NextAuthConfig } from "next-auth";
  * runs in the Node runtime (route handlers, server actions, server components).
  */
 
-// Routes that require a signed-in user. Anything under these is gated by the
-// `authorized` callback below (which middleware runs on every matched request).
-const PROTECTED_PREFIXES = ["/dashboard", "/documents", "/search", "/settings"];
+// Routes that require a signed-in user (PROTECTED_PREFIXES) are gated by the
+// `authorized` callback below, which middleware runs on every matched request.
 
 export const authConfig = {
   // Honour the deployment host when validating callback/redirect URLs.
   trustHost: true,
   pages: {
-    signIn: "/sign-in",
+    signIn: ROUTES.signIn,
   },
   session: {
     strategy: "jwt",
@@ -29,9 +29,9 @@ export const authConfig = {
       if (isProtected) return isLoggedIn;
 
       // Signed-in users landing on an auth page get bounced to the dashboard.
-      const isAuthPage = nextUrl.pathname === "/sign-in" || nextUrl.pathname === "/sign-up";
+      const isAuthPage = AUTH_PAGES.some((page) => nextUrl.pathname === page);
       if (isAuthPage && isLoggedIn) {
-        return Response.redirect(new URL("/dashboard", nextUrl));
+        return Response.redirect(new URL(ROUTES.dashboard, nextUrl));
       }
 
       return true;

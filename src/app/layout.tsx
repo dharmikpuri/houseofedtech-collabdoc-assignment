@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { RouteProgress } from "@/components/layout/route-progress";
+import { BRAND_COLORS, SITE } from "@/config/site";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 
@@ -23,27 +24,25 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: {
-    default: "CollabDoc — Write together. Even offline.",
-    template: "%s · CollabDoc",
+    default: `${SITE.name} — ${SITE.tagline}`,
+    template: `%s · ${SITE.name}`,
   },
-  description:
-    "A local-first collaborative document workspace. Real-time CRDT sync, safe version history, role-based sharing and AI that reads your documents — and it keeps working without the internet.",
+  description: SITE.description,
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icon.svg" },
   openGraph: {
     type: "website",
-    siteName: "CollabDoc",
-    title: "CollabDoc — Write together. Even offline.",
-    description:
-      "Local-first collaborative documents with real-time CRDT sync, version history, role-based sharing and grounded AI.",
+    siteName: SITE.name,
+    title: `${SITE.name} — ${SITE.tagline}`,
+    description: SITE.shortDescription,
   },
   twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0c16" },
+    { media: "(prefers-color-scheme: light)", color: BRAND_COLORS.backgroundLight },
+    { media: "(prefers-color-scheme: dark)", color: BRAND_COLORS.backgroundDark },
   ],
 };
 
@@ -56,7 +55,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       suppressHydrationWarning
       className={`${inter.variable} ${manrope.variable} ${geistMono.variable}`}
     >
-      <body className="min-h-dvh">
+      {/* Browser extensions (colour pickers, password managers) add attributes
+          to <body> before React hydrates; this silences that attribute-only
+          mismatch on this one element. Children are still checked. */}
+      <body className="min-h-dvh" suppressHydrationWarning>
         <ThemeProvider>
           {/* Lets keyboard users jump past the navigation on every page. */}
           <a

@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SearchLoading() {
   return (
-    <div className="animate-fade-in mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12" aria-busy>
+    <div className="animate-fade-in container-narrow py-[clamp(1.75rem,3vw,2.5rem)]" aria-busy>
       <span className="sr-only" role="status">
         Loading search…
       </span>

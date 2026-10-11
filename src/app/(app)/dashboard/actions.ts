@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { createDocument, deleteDocument } from "@/lib/authz/documents";
+import { ROUTES, documentPath } from "@/config/routes";
 
 /**
  * Server actions run only on the server, so they re-check the session
@@ -14,16 +15,16 @@ import { createDocument, deleteDocument } from "@/lib/authz/documents";
 
 export async function createDocumentAction() {
   const session = await auth();
-  if (!session?.user) redirect("/sign-in");
+  if (!session?.user) redirect(ROUTES.signIn);
 
   const doc = await createDocument(session.user.id);
-  redirect(`/documents/${doc.id}`);
+  redirect(documentPath(doc.id));
 }
 
 export async function deleteDocumentAction(documentId: string) {
   const session = await auth();
-  if (!session?.user) redirect("/sign-in");
+  if (!session?.user) redirect(ROUTES.signIn);
 
   await deleteDocument(session.user.id, documentId);
-  revalidatePath("/dashboard");
+  revalidatePath(ROUTES.dashboard);
 }

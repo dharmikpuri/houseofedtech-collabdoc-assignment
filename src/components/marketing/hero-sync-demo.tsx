@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { PERSONAS } from "@/config/site";
 
 /**
  * The hero: the product's core behaviour, playable.
@@ -29,8 +30,8 @@ type Phase = "synced" | "offline" | "merged";
 const DURATION: Record<Phase, number> = { synced: 2600, offline: 4600, merged: 4600 };
 const NEXT: Record<Phase, Phase> = { synced: "offline", offline: "merged", merged: "synced" };
 
-const AISHA = { name: "Aisha", color: "#e5484d" };
-const MARCO = { name: "Marco", color: "#0e9f8e" };
+const AISHA = PERSONAS.aisha;
+const MARCO = PERSONAS.marco;
 
 const STEPS: { id: Phase; label: string }[] = [
   { id: "synced", label: "In sync" },

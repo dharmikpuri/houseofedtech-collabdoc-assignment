@@ -25,6 +25,7 @@ import { AiText, type Citation } from "@/components/ai/ai-text";
 import { streamAi } from "@/lib/ai/read-stream";
 import { useNetworkStatus } from "@/lib/sync/use-network-status";
 import type { SearchResult } from "@/lib/search/search";
+import { documentPath } from "@/config/routes";
 
 type Mode = "ask" | "search";
 type Coverage = { indexed: number; total: number };
@@ -361,7 +362,7 @@ function AnswerView({ answer }: { answer: Answer }) {
                 <span className="bg-primary-subtle text-primary inline-flex size-5 shrink-0 items-center justify-center rounded text-[10px] font-semibold">
                   {source.n}
                 </span>
-                <Link href={`/documents/${source.documentId}`} className="truncate hover:underline">
+                <Link href={documentPath(source.documentId)} className="truncate hover:underline">
                   {source.title}
                 </Link>
               </li>
@@ -441,7 +442,7 @@ function SearchResults({
             className="hover:bg-muted/40 relative px-4 py-3 transition-colors"
           >
             <Link
-              href={`/documents/${result.documentId}`}
+              href={documentPath(result.documentId)}
               className="flex items-center gap-2 after:absolute after:inset-0"
             >
               <FileText className="text-primary size-4 shrink-0" aria-hidden />

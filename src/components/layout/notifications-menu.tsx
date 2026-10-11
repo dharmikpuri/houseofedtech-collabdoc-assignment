@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatRelative } from "@/lib/format/relative-time";
 import type { NotificationView } from "@/lib/authz/notifications";
+import { documentPath } from "@/config/routes";
 
 const POLL_MS = 60_000;
 
@@ -69,9 +70,7 @@ export function NotificationsMenu() {
 
   function openItem(item: NotificationView) {
     setOpen(false);
-    router.push(
-      `/documents/${item.documentId}${item.threadId ? `?thread=${encodeURIComponent(item.threadId)}` : ""}`,
-    );
+    router.push(documentPath(item.documentId, { thread: item.threadId ?? undefined }));
   }
 
   return (

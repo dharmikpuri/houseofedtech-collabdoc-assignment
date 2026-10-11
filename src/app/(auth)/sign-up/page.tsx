@@ -14,7 +14,7 @@ export default async function SignUpPage({
 
   return (
     <div>
-      <h1 className="font-display text-[1.75rem] leading-tight">Create your workspace</h1>
+      <h1 className="page-title">Create your workspace</h1>
       <p className="text-muted-foreground mt-1.5 mb-8 text-sm">
         Start writing in seconds. It works offline from the very first keystroke.
       </p>

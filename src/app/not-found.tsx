@@ -3,12 +3,13 @@ import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand/logo";
+import { ROUTES } from "@/config/routes";
 
 export default function NotFound() {
   return (
     <div className="relative flex min-h-dvh flex-col">
       <div className="bg-wash pointer-events-none absolute inset-x-0 top-0 h-[480px]" aria-hidden />
-      <header className="relative mx-auto flex h-16 w-full max-w-6xl items-center px-4 sm:px-6">
+      <header className="container-page relative flex h-16 items-center">
         <Logo />
       </header>
       <main
@@ -19,20 +20,20 @@ export default function NotFound() {
         <p className="bg-primary-subtle text-primary mt-8 rounded-full px-3 py-1 text-sm font-semibold">
           Error 404
         </p>
-        <h1 className="font-display mt-4 text-4xl leading-tight sm:text-5xl">Page not found</h1>
+        <h1 className="section-title mt-4">Page not found</h1>
         <p className="text-muted-foreground mt-4 text-sm text-balance">
           It doesn&apos;t exist, or you don&apos;t have access to it. If someone shared a link with
           you, ask them to check your role.
         </p>
         <div className="mt-8 flex flex-col gap-2 sm:flex-row">
           <Button asChild size="lg">
-            <Link href="/dashboard">
+            <Link href={ROUTES.dashboard}>
               <ArrowLeft />
               Back to documents
             </Link>
           </Button>
           <Button asChild variant="secondary" size="lg">
-            <Link href="/">Go to homepage</Link>
+            <Link href={ROUTES.home}>Go to homepage</Link>
           </Button>
         </div>
       </main>

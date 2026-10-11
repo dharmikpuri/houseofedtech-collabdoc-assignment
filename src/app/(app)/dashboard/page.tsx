@@ -7,6 +7,7 @@ import { listDocuments } from "@/lib/authz/documents";
 import { listFolders } from "@/lib/authz/folders";
 import { DocumentList } from "@/components/documents/document-list";
 import { ImportButton } from "@/components/documents/import-button";
+import { PageHeader } from "@/components/ui/page-header";
 import { CreateDocumentButton } from "@/components/documents/create-document-button";
 
 export const metadata: Metadata = { title: "Documents" };
@@ -61,38 +62,34 @@ export default async function DashboardPage() {
   const createButton = <CreateDocumentButton />;
 
   return (
-    <div className="animate-page-in mx-auto w-full max-w-7xl px-4 py-7 sm:px-8 sm:py-9">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="font-display text-[1.75rem] leading-tight">Welcome back, {firstName}</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Everything here is saved on this device first, so it stays editable offline.
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <ImportButton />
-          {createButton}
-        </div>
-      </div>
+    <div className="animate-page-in container-app py-[clamp(1.75rem,3vw,2.5rem)]">
+      <PageHeader
+        title={<>Welcome back, {firstName}</>}
+        description="Everything here is saved on this device first, so it stays editable offline."
+        actions={
+          <>
+            <ImportButton />
+            {createButton}
+          </>
+        }
+      />
 
       {documents.length > 0 && (
-        <dl className="mt-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <dl className="mt-[clamp(1.25rem,2.5vw,1.75rem)] grid grid-cols-2 gap-[clamp(0.75rem,1.5vw,1rem)] lg:grid-cols-4">
           {stats.map(({ label, value, note, icon: Icon }) => (
             <div key={label} className="card flex flex-col rounded-xl p-4 sm:p-5">
               <dt className="text-muted-foreground flex items-center justify-between gap-2 text-[13px] font-medium">
                 {label}
                 <Icon className="text-muted-foreground/70 size-4" aria-hidden />
               </dt>
-              <dd className="font-display mt-2 text-[1.75rem] leading-none tabular-nums">
-                {value}
-              </dd>
+              <dd className="page-title mt-2 leading-none tabular-nums">{value}</dd>
               <dd className="text-muted-foreground mt-2 truncate text-xs">{note}</dd>
             </div>
           ))}
         </dl>
       )}
 
-      <div className="mt-7">
+      <div className="mt-[clamp(1.25rem,2.5vw,1.75rem)]">
         {/* The list reads the active view from the URL (useSearchParams). */}
         <Suspense fallback={null}>
           <DocumentList documents={items} folders={folders} createAction={createButton} />

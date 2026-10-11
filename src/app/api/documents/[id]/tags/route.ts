@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { listTags, setTags } from "@/lib/authz/tags";
 import { authorizeDocumentRoute, badRequest, readJson } from "@/lib/security/document-route";
 import { setTagsSchema } from "@/lib/validation/ai";
+import { ROUTES } from "@/config/routes";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -35,6 +36,6 @@ export async function PUT(request: Request, { params }: Params) {
       { status: result.reason === "forbidden" ? 403 : 404 },
     );
   }
-  revalidatePath("/dashboard");
+  revalidatePath(ROUTES.dashboard);
   return NextResponse.json({ tags: result.tags });
 }

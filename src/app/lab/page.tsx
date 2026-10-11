@@ -5,11 +5,11 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
 import { SectionLabel } from "@/components/marketing/parts";
 import { SyncLab } from "@/components/lab/sync-lab";
+import { SITE } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Sync lab",
-  description:
-    "Watch two offline devices edit the same document and merge deterministically — a live demonstration of CollabDoc's CRDT sync.",
+  description: `Watch two offline devices edit the same document and merge with nothing lost — a live demonstration of ${SITE.name}'s offline sync.`,
 };
 
 /**
@@ -29,10 +29,10 @@ export default async function LabPage() {
           className="bg-wash pointer-events-none absolute inset-x-0 top-0 h-[420px]"
           aria-hidden
         />
-        <div className="relative mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="container-page relative py-[clamp(2.5rem,5vw,3.5rem)]">
           <div className="mb-10 max-w-2xl">
             <SectionLabel>Sync lab</SectionLabel>
-            <h1 className="font-display mt-5 text-4xl leading-[1.08] sm:text-5xl">
+            <h1 className="section-title mt-5">
               Break the network. <span className="text-primary">Keep writing.</span>
             </h1>
             <p className="text-muted-foreground mt-4 text-base leading-relaxed text-balance">

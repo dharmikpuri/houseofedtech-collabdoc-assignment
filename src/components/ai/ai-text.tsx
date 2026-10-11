@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
+import { documentPath } from "@/config/routes";
 
 export type Citation = { n: number; documentId: string; title: string };
 
@@ -62,7 +63,7 @@ function WithCitations({ text, citations }: { text: string; citations?: Citation
         return (
           <Link
             key={index}
-            href={`/documents/${citation.documentId}`}
+            href={documentPath(citation.documentId)}
             title={citation.title}
             className="bg-primary-subtle text-primary mx-0.5 inline-flex items-center rounded px-1 align-baseline text-[10px] font-semibold no-underline hover:underline"
           >

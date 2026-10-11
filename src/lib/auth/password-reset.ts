@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { sendEmail } from "@/lib/email/send";
 import { log } from "@/lib/observability/logger";
+import { SITE } from "@/config/site";
 
 /**
  * Password reset.
@@ -66,7 +67,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   try {
     await sendEmail({
       to: user.email,
-      subject: "Reset your CollabDoc password",
+      subject: `Reset your ${SITE.name} password`,
       text: `${greeting}\n\nUse this link to choose a new password. It expires in 1 hour and works once:\n\n${link}\n\nIf you didn't ask for this, you can ignore this email — your password won't change.`,
       html: `<p>${escapeHtml(greeting)}</p><p>Use the button below to choose a new password. The link expires in 1 hour and works once.</p><p><a href="${link}" style="display:inline-block;padding:10px 16px;background:#4f46e5;color:#fff;border-radius:6px;text-decoration:none">Reset password</a></p><p style="color:#71717a;font-size:13px">If you didn't ask for this, you can ignore this email — your password won't change.</p>`,
     });

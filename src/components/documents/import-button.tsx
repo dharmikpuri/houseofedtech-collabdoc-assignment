@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { firstHeading, parseMarkdown } from "@/lib/markdown/parse";
 import { importStorageKey, PENDING_IMPORT_KEY } from "@/lib/import/storage";
+import { documentPath } from "@/config/routes";
 
 const MAX_BYTES = 1_000_000;
 const ACCEPTED = /\.(md|markdown|txt)$/i;
@@ -83,7 +84,7 @@ export function ImportButton() {
 
       sessionStorage.setItem(importStorageKey(data.id), serialized);
       sessionStorage.removeItem(PENDING_IMPORT_KEY);
-      router.push(`/documents/${data.id}`);
+      router.push(documentPath(data.id));
     } catch {
       toast.error("Couldn't read that file.");
     } finally {

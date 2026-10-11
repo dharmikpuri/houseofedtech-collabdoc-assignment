@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ROUTES } from "@/config/routes";
 
 /**
  * Account menu.
@@ -75,7 +76,7 @@ export function UserMenu({
           <DropdownMenuSeparator />
 
           <DropdownMenuItem asChild>
-            <Link href="/settings">
+            <Link href={ROUTES.settings}>
               <Settings />
               Settings
             </Link>

@@ -49,6 +49,12 @@
   --ink: #0f1326;
   --ink-foreground: #ffffff;
 
+  /* Marketing: the offset block behind feature visuals, the closing band, and
+     the colour cut out of filled glyph icons. */
+  --slab: #0f1326;
+  --band: #0f1326;
+  --glyph-cut: #ffffff;
+
   /* Semantic states. Each has a text-safe and a subtle-background variant so
      badges and banners stay AA-contrast in both modes. */
   --success: #0c8a56;
@@ -72,6 +78,11 @@
   --shadow-button:
     inset 0 1px 0 0 rgb(255 255 255 / 0.18), 0 1px 2px 0 rgb(15 19 38 / 0.18),
     0 4px 10px -4px rgb(79 95 245 / 0.5);
+
+  /* Display type: the face, weight and tracking every headline shares. */
+  --display-font: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --display-weight: 750;
+  --display-tracking: -0.035em;
 
   /* A very pale brand tint behind the marketing hero. */
   --wash: radial-gradient(70% 60% at 50% 0%, rgb(79 95 245 / 0.1), transparent 70%);
@@ -104,6 +115,10 @@
 
   --ink: #e9ebf4;
   --ink-foreground: #0a0c16;
+
+  --slab: #262c52;
+  --band: #121735;
+  --glyph-cut: #0a0c16;
 
   --success: #4ade80;
   --success-subtle: #0d2819;
@@ -148,6 +163,8 @@
   --color-primary-solid-hover: var(--primary-solid-hover);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
+  --color-slab: var(--slab);
+  --color-band: var(--band);
   --color-success: var(--success);
   --color-success-subtle: var(--success-subtle);
   --color-warning: var(--warning);
@@ -179,6 +196,80 @@
   --animate-page-in: page-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
+/* ── Layout utilities ─────────────────────────────────────────────────────── */
+
+/* Fluid page containers: the side gutter grows with the viewport between a
+   rem floor and ceiling, and the content width is capped in rem, so a layout
+   reads the same from a phone to a wide desktop without breakpoint jumps. */
+
+/* Public pages: wide enough that large screens aren't mostly margin. */
+@utility container-page {
+  width: 100%;
+  max-width: 90rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 3rem);
+}
+
+/* App pages beside the sidebar (dashboard, lists). */
+@utility container-app {
+  width: 100%;
+  max-width: 96rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 2.5rem);
+}
+
+/* Focused single-column pages (search, settings). */
+@utility container-narrow {
+  width: 100%;
+  max-width: 56rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+/* Vertical rhythm for marketing sections. */
+@utility section-y {
+  padding-block: clamp(3.5rem, 7vw, 6rem);
+}
+
+/* Fluid headline sizes. */
+/* Fluid headline presets. Each carries the display face, so one class sets a
+   heading completely; change a size here and every heading of that kind
+   follows. */
+@utility hero-title {
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  font-size: clamp(2.2rem, 1.1rem + 3.6vw, 4rem);
+  line-height: 1.12;
+}
+
+/* Marketing section headlines. */
+@utility section-title {
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  font-size: clamp(2rem, 1.3rem + 2.2vw, 3.25rem);
+  line-height: 1.08;
+}
+
+/* Page headings in the app and on the auth screens. */
+@utility page-title {
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  font-size: clamp(1.5rem, 1.25rem + 0.8vw, 1.875rem);
+  line-height: 1.2;
+}
+
+/* Card and panel headings. */
+@utility card-title {
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
 /* ── Component utilities ──────────────────────────────────────────────────── */
 
 @utility shadow-button {
@@ -205,9 +296,9 @@
 
 /* Display type for page and marketing headlines. */
 @utility font-display {
-  font-family: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 750;
-  letter-spacing: -0.035em;
+  font-family: var(--display-font);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
 }
 
 @keyframes fade-in {
@@ -344,6 +435,160 @@ body {
   from {
     opacity: 0;
     transform: translateY(8px);
+  }
+}
+
+/* ── Product motion ───────────────────────────────────────────────────────── */
+/* Everything here is decorative except the merge loader (marked
+   .motion-essential), so the reduced-motion rule above stills it. */
+
+/* Dotted connectors whose dots march in the direction of the flow. */
+@utility flow-dots-y {
+  background-image: radial-gradient(circle, currentColor 1px, transparent 1.4px);
+  background-size: 2px 6px;
+  background-repeat: repeat-y;
+  background-position: center 0;
+  animation: flow-y 0.9s linear infinite;
+}
+
+@utility flow-dots-x {
+  background-image: radial-gradient(circle, currentColor 1px, transparent 1.4px);
+  background-size: 6px 2px;
+  background-repeat: repeat-x;
+  background-position: 0 center;
+  animation: flow-x 0.9s linear infinite;
+}
+
+@keyframes flow-y {
+  to {
+    background-position: center 6px;
+  }
+}
+
+@keyframes flow-x {
+  to {
+    background-position: 6px center;
+  }
+}
+
+/* A short dash travelling along an SVG path drawn with pathLength="100". */
+@keyframes dash-travel {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* A line being written: drawn in, held, then cleared for the next loop. */
+@keyframes line-write {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 1;
+  }
+  45%,
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+/* The merge point taking in both streams. */
+@keyframes node-beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+/* A typing caret. */
+@keyframes caret-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  55%,
+  100% {
+    opacity: 0.1;
+  }
+}
+
+/* The key step of a flow announcing itself every few seconds. */
+@keyframes step-ping {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 35%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+/* A queued action being sent, one after another. */
+@keyframes queue-send {
+  0%,
+  18% {
+    background-color: var(--subtle);
+    border-color: var(--border);
+  }
+  26%,
+  42% {
+    background-color: var(--success-subtle);
+    border-color: color-mix(in oklab, var(--success) 40%, transparent);
+  }
+  55%,
+  100% {
+    background-color: var(--subtle);
+    border-color: var(--border);
+  }
+}
+
+/* A check landing as each security layer passes. */
+@keyframes check-pop {
+  0%,
+  10% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  22%,
+  88% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Cards rise into place as they scroll into view — only where the browser
+   supports scroll-driven animation, and never under reduced motion. */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
   }
 }
 

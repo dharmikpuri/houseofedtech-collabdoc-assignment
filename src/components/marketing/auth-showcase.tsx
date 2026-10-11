@@ -1,6 +1,12 @@
-import { Check, GitMerge } from "lucide-react";
-
-import { MergeArt } from "@/components/marketing/feature-art";
+import {
+  GlyphCursor,
+  GlyphHistory,
+  GlyphMerge,
+  GlyphOffline,
+  GlyphUsers,
+} from "@/components/brand/glyphs";
+import { MergeArt } from "@/components/marketing/art/merge-art";
+import { IconTile } from "@/components/ui/icon-tile";
 import { SectionLabel } from "@/components/marketing/parts";
 
 /**
@@ -18,7 +24,7 @@ export function AuthShowcase() {
       <div className="bg-dotgrid pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent,#000_35%,#000_75%,transparent)]" />
 
       <div className="relative">
-        <SectionLabel>Local-first workspace</SectionLabel>
+        <SectionLabel>Works offline</SectionLabel>
         <h2 className="font-display mt-5 max-w-md text-4xl leading-[1.1] xl:text-5xl">
           The workspace that keeps writing{" "}
           <span className="text-primary">when the network doesn&apos;t</span>
@@ -29,9 +35,9 @@ export function AuthShowcase() {
       <div className="border-border bg-surface relative mx-auto my-10 w-full max-w-md overflow-hidden rounded-2xl border shadow-lg">
         <div className="border-border flex items-center justify-between border-b px-4 py-3">
           <p className="flex items-center gap-2.5 text-sm font-semibold">
-            <span className="bg-primary-subtle text-primary flex size-7 items-center justify-center rounded-lg">
-              <GitMerge className="size-4" />
-            </span>
+            <IconTile size="sm" shape="rounded" className="size-7">
+              <GlyphMerge />
+            </IconTile>
             Merge
           </p>
           <span className="bg-success-subtle text-success rounded-full px-2 py-0.5 text-xs font-medium">
@@ -48,16 +54,14 @@ export function AuthShowcase() {
 
       <ul className="relative grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
         {[
-          "Works fully offline",
-          "Live cursors and comments",
-          "Version history you can restore",
-          "Role-based sharing",
-        ].map((label) => (
-          <li key={label} className="flex items-center gap-2.5">
-            <span className="bg-primary-subtle text-primary flex size-5 shrink-0 items-center justify-center rounded-full">
-              <Check className="size-3" strokeWidth={3} />
-            </span>
-            {label}
+          { icon: <GlyphOffline />, label: "Works fully offline" },
+          { icon: <GlyphCursor />, label: "Live cursors and comments" },
+          { icon: <GlyphHistory />, label: "Version history you can restore" },
+          { icon: <GlyphUsers />, label: "Role-based sharing" },
+        ].map((item) => (
+          <li key={item.label} className="flex items-center gap-2.5 font-medium">
+            <span className="text-primary">{item.icon}</span>
+            {item.label}
           </li>
         ))}
       </ul>

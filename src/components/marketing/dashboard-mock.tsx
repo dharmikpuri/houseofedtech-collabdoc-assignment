@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { tagTint } from "@/lib/tags";
 import { LogoMark } from "@/components/brand/logo";
+import { SITE } from "@/config/site";
 
 /**
  * A static, coded rendering of the workspace dashboard for the landing page.
@@ -65,7 +66,7 @@ export function DashboardMock({ className }: { className?: string }) {
       <div className="border-border bg-subtle hidden w-48 shrink-0 flex-col border-r p-3 md:flex">
         <div className="flex items-center gap-2 px-1 py-0.5">
           <LogoMark className="size-5" />
-          <span className="font-display truncate text-[13px]">CollabDoc</span>
+          <span className="font-display truncate text-[13px]">{SITE.name}</span>
         </div>
         <div className="bg-primary-solid mt-3 flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-[11px] font-medium text-white">
           <Plus className="size-3" />

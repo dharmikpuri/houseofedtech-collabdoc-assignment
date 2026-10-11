@@ -161,7 +161,7 @@ function LabSession({ onReset }: { onReset: () => void }) {
     checkConvergence();
 
     addLog(
-      `Reconnected. Exchanged state vectors and sent only the missing updates: ${toB.byteLength} bytes Alice → Bob, ${toA.byteLength} bytes Bob → Alice.`,
+      `Reconnected. Each device sent only the changes the other was missing — nothing was overwritten.`,
     );
     addLog(
       orderIndependent
@@ -314,15 +314,12 @@ function LabSession({ onReset }: { onReset: () => void }) {
             What you&apos;re seeing
           </h2>
           <ul className="text-muted-foreground list-disc space-y-1.5 pl-4">
-            <li>Each device has its own copy of the document — a Yjs CRDT.</li>
+            <li>Each device keeps its own full copy of the document.</li>
             <li>
               Offline edits are applied locally and counted as pending. Nothing is sent, nothing
               blocks.
             </li>
-            <li>
-              On reconnect, each side sends only the updates the other lacks, computed from its
-              state vector.
-            </li>
+            <li>On reconnect, each side sends only the changes the other is missing.</li>
             <li>
               The lab re-merges both states in both orders to prove the result doesn&apos;t depend
               on who syncs first.

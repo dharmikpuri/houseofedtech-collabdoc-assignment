@@ -34,11 +34,16 @@ const buttonVariants = cva(
           "bg-surface text-foreground border-border hover:bg-subtle hover:border-border-strong border shadow-xs",
         ghost: "text-foreground hover:bg-muted",
         "danger-ghost": "text-danger hover:bg-danger-subtle",
+        // On the dark closing band: a white fill, and an outlined companion.
+        inverse: "text-band bg-white shadow-sm hover:bg-white/90",
+        "inverse-outline": "border border-white/25 text-white hover:bg-white/10",
       },
       size: {
         sm: "h-8 px-2.5 text-xs [&_svg]:size-3.5",
         md: "h-9 px-3.5 text-sm [&_svg]:size-4",
         lg: "h-12 rounded-xl px-6 text-[15px] [&_svg]:size-4",
+        // The big call to action in a marketing section.
+        xl: "h-14 rounded-2xl px-9 text-base [&_svg]:size-4",
         "icon-sm": "size-8 [&_svg]:size-4",
         icon: "size-9 [&_svg]:size-4",
       },

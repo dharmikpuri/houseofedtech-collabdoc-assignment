@@ -1,17 +1,15 @@
+import { MergeLoader } from "@/components/brand/merge-loader";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * Shown while a document's versions, collaborators and tags load. Mirrors
- * the editor's header, toolbar and page so the swap to real content is calm.
+ * Shown while a document's versions, collaborators and tags load. The header
+ * and toolbars are mirrored as skeletons so the swap to real content is calm;
+ * the page itself shows the merge loader.
  */
 export function DocumentSkeleton() {
   return (
     <div className="animate-fade-in flex h-[calc(100dvh-3.5rem)] flex-col" aria-busy>
-      <span className="sr-only" role="status">
-        Opening document…
-      </span>
-
-      <div className="border-border bg-surface/60 shrink-0 border-b px-4 py-3 sm:px-6">
+      <div className="border-border bg-surface/60 shrink-0 border-b px-[clamp(1rem,3vw,2.5rem)] py-3">
         <Skeleton className="h-3 w-40" />
         <div className="mt-3 flex items-start justify-between gap-3">
           <div className="space-y-2">
@@ -42,17 +40,11 @@ export function DocumentSkeleton() {
         ))}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden">
-        <div className="mx-auto w-full max-w-3xl space-y-4 px-5 py-10 sm:px-10 sm:py-14">
-          <Skeleton className="h-8 w-1/2" />
-          {[96, 88, 92, 70].map((width, index) => (
-            <Skeleton key={index} className="h-4" style={{ width: `${width}%` }} />
-          ))}
-          <Skeleton className="mt-8 h-6 w-1/3" />
-          {[90, 84, 60].map((width, index) => (
-            <Skeleton key={index} className="h-4" style={{ width: `${width}%` }} />
-          ))}
-        </div>
+      <div className="flex min-h-0 flex-1 items-center justify-center px-4 pb-[8vh]">
+        <MergeLoader
+          label="Opening document…"
+          detail="Syncing your local copy with collaborators"
+        />
       </div>
     </div>
   );

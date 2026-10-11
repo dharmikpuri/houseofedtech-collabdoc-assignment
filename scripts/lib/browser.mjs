@@ -147,7 +147,10 @@ export async function newPage(port) {
       const details = result.result?.exceptionDetails;
       if (details) {
         const message =
-          details.exception?.description ?? details.exception?.value ?? details.text ?? "evaluate failed";
+          details.exception?.description ??
+          details.exception?.value ??
+          details.text ??
+          "evaluate failed";
         throw new Error(String(message).split("\n")[0]);
       }
       return result.result?.result?.value;

@@ -57,6 +57,27 @@ function trackSize(
   }
 }
 
+// ── Keep-alive ───────────────────────────────────────────────────────────────
+//
+// A free Supabase project pauses after a week without database activity. This
+// process runs around the clock, so it writes a heartbeat row on start and
+// every 12 hours — a backup for the app's daily cron (api/cron/heartbeat).
+
+const HEARTBEAT_INTERVAL_MS = 12 * 60 * 60 * 1000;
+
+async function beat() {
+  try {
+    await pool.query(
+      `INSERT INTO heartbeats (source, beat_at, beats) VALUES ('collab-server', now(), 1)
+       ON CONFLICT (source) DO UPDATE SET beat_at = now(), beats = heartbeats.beats + 1`,
+    );
+  } catch (error) {
+    console.warn(
+      JSON.stringify({ level: "warn", message: "heartbeat write failed", error: String(error) }),
+    );
+  }
+}
+
 const server = new Server({
   port,
   websocketOptions: { maxPayload: MAX_MESSAGE_BYTES },
@@ -129,6 +150,8 @@ const server = new Server({
   },
   onListen: async () => {
     console.log(`Collab server ready on ws://localhost:${port}`);
+    void beat();
+    setInterval(() => void beat(), HEARTBEAT_INTERVAL_MS).unref();
   },
 });
 

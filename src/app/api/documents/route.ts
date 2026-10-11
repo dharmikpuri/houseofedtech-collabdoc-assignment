@@ -6,6 +6,7 @@ import { createDocument, listDocuments } from "@/lib/authz/documents";
 import { checkBodySize, checkRateLimit } from "@/lib/security/guard";
 import { badRequest, readJson } from "@/lib/security/document-route";
 import { createDocumentBodySchema } from "@/lib/validation/workspace";
+import { ROUTES } from "@/config/routes";
 
 /** The caller's documents with their personal metadata (palette, sidebar). */
 export async function GET(request: Request) {
@@ -43,6 +44,6 @@ export async function POST(request: Request) {
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message);
 
   const document = await createDocument(session.user.id, parsed.data.title, parsed.data.source);
-  revalidatePath("/dashboard");
+  revalidatePath(ROUTES.dashboard);
   return NextResponse.json({ id: document.id }, { status: 201 });
 }
